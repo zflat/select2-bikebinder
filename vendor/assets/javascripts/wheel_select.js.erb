@@ -1,0 +1,201 @@
+function WheelSelectBuilder(args){
+    var id = args.id;
+    var allow_multiple = args.multiple;
+    var selector = '#'+id;
+    var loaded_full = false;
+
+    var sizes = <%= IsoBsdI18n::Size.all.hash.to_json.html_safe %>;
+    var data_sizes_all = <%= IsoBsdI18n::Size.all.to_data.to_json.html_safe %>;
+    // <%
+    d = IsoBsdI18n::Rarity::Division.new;
+    data_partial = d.common.to_data + d.uncommon.to_data; 
+    // %>
+    var data_sizes_partial = <%= data_partial.to_json.html_safe %>;
+
+    function matcher(term, bsd){
+	var strBSD = ""+bsd;
+	var match_beginning = (strBSD.indexOf(term)==0);
+
+	var trad = sizes[bsd].trad;
+	trad = is_list(trad)?
+	    trad:
+	    [trad];
+
+	var match_trad = false;
+
+	for(var i=0; i<trad.length; i++){
+	    val = trad[i];
+	    if((val.indexOf(term) >=0)){
+		match_trad = true;
+		break;
+	    }
+	}
+
+	return match_beginning || match_trad;
+    }
+
+    function linear_search(term, choices){
+	var matches = [];
+	for(var i=0; i<choices.length; i++){
+	    if(matcher(term, choices[i].id)){
+		matches.unshift(choices[i]);
+	    }
+	}
+	return matches;
+    }
+
+    function q_options(query){
+        var more=false;
+        var context=null;
+	var choices = [];
+
+	if(query.term == ""){
+	    choices = (loaded_full)?
+		data_sizes_all:
+		data_sizes_partial;
+	    choices = append_header(choices);
+	}else{
+	    choices = linear_search(query.term, data_sizes_all);
+	}
+
+	data = {results: choices, more: false, context: null};
+	query.callback(data);
+     }
+
+
+    function append_header(choices){
+	header_option = {id:'header', text:"Select a wheel size"}
+	a = choices.slice();
+	a.unshift(header_option);
+	return a;
+    }
+
+    function load_full_id(){
+	return "no_size_match_" + id;
+    }
+
+    function load_full_selector(){
+	return "#" + load_full_id();
+    }
+
+    // stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript	
+    function capStr(string){
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function noMatchesMsg(term){
+	if(term.length<2)
+	    return "Please enter 2 or more characters";
+
+	var base_msg = 	"No matches found.";
+
+	var text = loaded_full?
+	    base_msg:
+	    base_msg + " Load <a id=\""+
+	    load_full_id()+"\" href=\"#\">full list for more options</a>.";
+
+	return text;
+    }
+    function load_full(event){
+	loaded_full = true;
+	clear_selection();
+	$(selector).select2("close");	
+	$(selector).select2("open");	
+	return false;
+    }
+
+    function conditionalClear(e){        
+        if(e.val == "header"){
+	    clear_selection();
+        } 
+    }
+
+    function clear_selection(){
+	$(selector).select2("data","");
+    }
+
+    function format_simple(size, container){
+	if(!size.id){
+	    return "";
+	}else if(size.id!="header") {
+           var str = (allow_multiple) ? 
+           format_compact_text(size, container) :
+           format_summary_text(size, container); 
+           return str;
+	}else{
+	    return "";
+	}
+    }
+
+    function format_summary_text(size, container){
+	    var str = sizes[size.id].diameter
+		+": \""
+		+sizes[size.id].trad+"\"";
+	    return str;  
+    }
+
+    function format_compact_text(size, container){
+       var str = sizes[size.id].diameter;
+       return str;
+    }
+
+    // Check if the object is an array of strings or just a string
+    function is_list(arr){
+	return (arr[arr.length-1].length) > 1;
+    }
+
+    function list_vals(arr){
+	strText = "";
+	if(is_list(arr)){
+	    strText = "<ul class=\"attrib\">";
+	    for(ind in arr){
+		strText +="<li>";
+		strText +=capStr(arr[ind]);
+		strText +="</li>";
+	    }
+	    strText +="</ul>";
+	}else{
+	    if (arr != "n/a")
+		arr = capStr(arr);
+	    strText = arr;
+	}
+	return strText;
+    }
+
+    function format_complete(size){
+	if(size.id=="header") {
+	    return "<table class=\"wheel_opt\"><tr><th class=\"iso\">"
+		+"ISO value</th><th class=\"trad\">"
+		+"Traditional Name</th><th class=\"app\">"
+		+"Application</th><th class=\"rarity\">"
+		+"Rarity</th></tr></table>";
+	}
+	return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
+	    sizes[size.id].diameter+"</td><td class=\"trad\">"+
+	    list_vals(sizes[size.id].trad)+"</td><td class=\"app\">"+
+	    list_vals(sizes[size.id].app)+"</td><td class=\"rarity\">"+
+	    capStr(sizes[size.id].rarity)+"</td></tr></table>";
+    }
+
+    this.build = function(){
+	$(selector).select2({
+		dropdownCss: {"background":"ccf", 
+			      "width":"700px", 
+			      "border":"1px solid #999", 
+			      "padding-top":"3px"},
+		allowClear: true,
+		formatResult: format_complete,
+		formatSelection: format_simple,
+		formatNoMatches: noMatchesMsg,
+		dropdownCssClass: "wheel_select",
+		data: append_header(data_sizes_partial),
+		placeholder: "Select a wheel size",
+		query: q_options,
+                multiple: allow_multiple
+	    });
+
+	$("*.wheel_select").on("click", load_full_selector(), load_full);
+	$(selector).on("change",conditionalClear);
+    }
+
+} 

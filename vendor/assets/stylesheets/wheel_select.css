@@ -1,0 +1,33 @@
+// Place all the styles related to the wheels controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+table.wheel_opt{
+margin: 0;
+padding: 0;
+width: 100%;
+}
+
+table.wheel_opt tr td,
+table.wheel_opt tr th{
+border: 1px solid #999;
+border-width: 0 1px 1px 0;
+}
+
+table.wheel_opt tr *.iso{width: 4em;}
+table.wheel_opt tr *.trad, table.wheel_opt tr th.trad{width: 8em;}
+table.wheel_opt tr *.app{width: 13em;}
+table.wheel_opt tr *.rarity{width: 8em;}
+
+table.wheel_opt tr td ul.attrib,
+table.wheel_opt tr td ul.attrib li {
+list-style-type: disc;
+list-style-position: outside;
+margin: 0;
+padding: 0;
+}
+
+table.wheel_opt tr td ul.attrib{
+margin-left: 16px;
+}
+
