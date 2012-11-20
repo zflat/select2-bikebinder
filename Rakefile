@@ -27,7 +27,7 @@ rescue LoadError
   require 'rake/rdoctask'
 end
 
-require_relative './lib/iso_bsd-i18n'
+require_relative './lib/select2-bikebinder'
 
 Rake::RDocTask.new do |rdoc|
   version = Select2BikeBinder::VERSION

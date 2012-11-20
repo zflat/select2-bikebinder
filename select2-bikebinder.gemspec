@@ -24,15 +24,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<rake>, [">= 0"])
   s.add_development_dependency(%q<rspec>, [">= 1.3.0"])
   s.add_development_dependency(%q<bundler>, ["~> 1.2"])
-  s.add_development_dependency "rails", "~> 3.0"
+  s.add_development_dependency( "iso_bsd-i18n", ">= 0")
 
-  s.add_development_dependency "railties", ">= 3.0", "< 5.0"
-
-  s.add_dependency(%q<rspec>, [">= 1.3.0"])
   s.add_dependency(%q<bundler>, ["~> 1.2"])
-  s.add_dependency "rails", "~> 3.0"
+  s.add_dependency( "iso_bsd-i18n", ">= 0")
 
-  s.add_dependency "railties", ">= 3.0", "< 5.0"
 
 end
 
