@@ -1,6 +1,7 @@
 // Instantiate the i18n object
 var I18n = I18n || {}
 
+
 // Set default locale to english
 I18n.defaultLocale = I18n.defaultLocal || "en";
 
@@ -10,23 +11,36 @@ function WheelSelectBuilder(args){
     var selector = '#'+id;
     var loaded_full = false;
 
-    var arr_bsd = <%= IsoBsdI18n::Size.all.hash.keys.to_json.html_safe %>;
+    var arr_bsd = {
+	common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
+	uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
+	rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
+    };
     var iso_bsd_sizes = <%= IsoBsdI18n::Size.all.hash_locale.to_json.html_safe %>;
 
     var sizes = function(){
-      var locale = I18n.locale || I18n.defaultLocale;
-      return iso_bsd_sizes[locale];
+	var locale = I18n.locale || I18n.defaultLocale;
+	data = iso_bsd_sizes[locale];
+	// revert to default locale if no data is found
+	if(null == data){
+	    data = iso_bsd_sizes[I18n.defaultLocale];
+	}
+	return data
     }
 
     function size_optns(rarity){
+	var list = [];
+	for (var r=0; r<rarity.length; r++){
+	    list = list.concat(arr_bsd[rarity[r]]);
+	}
+	// Sorting in descending order
+	// http://www.javascriptkit.com/javatutors/arraysort.shtml
+	var list_desc = list.sort(function (a,b){return b-a});
+
 	var opt = [];
-	for(var i=0; i<arr_bsd.length; i++){
-	    s_i = sizes()[arr_bsd[i]];
-	    for(var r=0; r<rarity.length; r++){
-		if(s_i.rarity == rarity[r]){
-		    opt.push({id:arr_bsd[i].toString(), text:s_i.diam});
-		} 
-	    }
+	for(var i=0; i<list_desc.length; i++){
+	    var s_i = sizes()[list_desc[i]];
+	    opt.push({id:list_desc[i].toString(), text:s_i.diameter});
 	}
 	return opt;
     }
