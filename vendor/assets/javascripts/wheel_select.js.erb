@@ -1,7 +1,6 @@
 // Instantiate the i18n object
 var I18n = I18n || {}
 
-
 // Set default locale to english
 I18n.defaultLocale = I18n.defaultLocal || "en";
 
@@ -10,6 +9,15 @@ function WheelSelectBuilder(args){
     var allow_multiple = args.multiple;
     var selector = '#'+id;
     var loaded_full = false;
+
+    /* <%
+       msg_loc_def = I18n.translate('isobsd.messages', :locale=>I18n.default_locale)
+       default_msg = msg_loc_def.to_json.html_safe
+    %> */
+    var arr_msg = <%= default_msg %>;
+    if (I18n.translate){
+	arr_msg = I18n.translate('isobsd.messages');
+    }
 
     var arr_bsd = {
 	common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
@@ -80,6 +88,7 @@ function WheelSelectBuilder(args){
 	return matches;
     }
 
+
     function q_options(query){
         var more=false;
         var context=null;
@@ -100,7 +109,7 @@ function WheelSelectBuilder(args){
 
 
     function append_header(choices){
-	header_option = {id:'header', text:"Select a wheel size"}
+	header_option = {id:'header', text:capStr(arr_msg.select_placeholder)}
 	a = choices.slice();
 	a.unshift(header_option);
 	return a;
@@ -121,14 +130,14 @@ function WheelSelectBuilder(args){
 
     function noMatchesMsg(term){
 	if(term.length<2)
-	    return "Please enter 2 or more characters";
+	    return capStr(arr_msg.seach_requirements);
 
-	var base_msg = 	"No matches found.";
+	var base_msg = 	capStr(arr_msg.search_no_found)+". ";
 
 	var text = loaded_full?
 	    base_msg:
-	    base_msg + " Load <a id=\""+
-	    load_full_id()+"\" href=\"#\">full list for more options</a>.";
+	    base_msg + "<a id=\""+
+	    load_full_id()+"\" href=\"#\">"+capStr(arr_msg.full_list_link)+"</a>.";
 
 	return text;
     }
@@ -201,10 +210,10 @@ function WheelSelectBuilder(args){
     function format_complete(size){
 	if(size.id=="header") {
 	    return "<table class=\"wheel_opt\"><tr><th class=\"iso\">"
-		+"ISO value</th><th class=\"trad\">"
-		+"Traditional Name</th><th class=\"app\">"
-		+"Application</th><th class=\"rarity\">"
-		+"Rarity</th></tr></table>";
+		+capStr(arr_msg.header.iso)+"</th><th class=\"trad\">"
+		+capStr(arr_msg.header.trad)+"</th><th class=\"app\">"
+		+capStr(arr_msg.header.app)+"</th><th class=\"rarity\">"
+		+capStr(arr_msg.header.rarity)+"</th></tr></table>";
 	}
 	return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
 	    sizes()[size.id].diameter+"</td><td class=\"trad\">"+
@@ -225,7 +234,7 @@ function WheelSelectBuilder(args){
 		formatNoMatches: noMatchesMsg,
 		dropdownCssClass: "wheel_select",
 		data: append_header(optns_partial),
-		placeholder: "Select a wheel size",
+		placeholder: capStr(arr_msg['select_placeholder']),
 		query: q_options,
                 multiple: allow_multiple
 	    });
