@@ -1,22 +1,44 @@
+// Instantiate the i18n object
+var I18n = I18n || {}
+
+// Set default locale to english
+I18n.defaultLocale = I18n.defaultLocal || "en";
+
 function WheelSelectBuilder(args){
     var id = args.id;
     var allow_multiple = args.multiple;
     var selector = '#'+id;
     var loaded_full = false;
 
-    var sizes = <%= IsoBsdI18n::Size.all.hash.to_json.html_safe %>;
-    var data_sizes_all = <%= IsoBsdI18n::Size.all.to_data.to_json.html_safe %>;
-    // <%
-    d = IsoBsdI18n::Rarity::Division.new;
-    data_partial = d.common.to_data + d.uncommon.to_data; 
-    // %>
-    var data_sizes_partial = <%= data_partial.to_json.html_safe %>;
+    var arr_bsd = <%= IsoBsdI18n::Size.all.hash.keys.to_json.html_safe %>;
+    var iso_bsd_sizes = <%= IsoBsdI18n::Size.all.hash_locale.to_json.html_safe %>;
+
+    var sizes = function(){
+      var locale = I18n.locale || I18n.defaultLocale;
+      return iso_bsd_sizes[locale];
+    }
+
+    function size_optns(rarity){
+	var opt = [];
+	for(var i=0; i<arr_bsd.length; i++){
+	    s_i = sizes()[arr_bsd[i]];
+	    for(var r=0; r<rarity.length; r++){
+		if(s_i.rarity == rarity[r]){
+		    opt.push({id:arr_bsd[i].toString(), text:s_i.diam});
+		} 
+	    }
+	}
+	return opt;
+    }
+
+    var optns_partial = size_optns(['common', 'uncommon']);
+    var optns_all = size_optns(['common', 'uncommon', 'rare']);
 
     function matcher(term, bsd){
 	var strBSD = ""+bsd;
 	var match_beginning = (strBSD.indexOf(term)==0);
 
-	var trad = sizes[bsd].trad;
+	var trad = sizes()[bsd].trad;
 	trad = is_list(trad)?
 	    trad:
 	    [trad];
@@ -51,11 +73,11 @@ function WheelSelectBuilder(args){
 
 	if(query.term == ""){
 	    choices = (loaded_full)?
-		data_sizes_all:
-		data_sizes_partial;
+		optns_all:
+		optns_partial;
 	    choices = append_header(choices);
 	}else{
-	    choices = linear_search(query.term, data_sizes_all);
+	    choices = linear_search(query.term, optns_all);
 	}
 
 	data = {results: choices, more: false, context: null};
@@ -128,15 +150,15 @@ function WheelSelectBuilder(args){
     }
 
     function format_summary_text(size, container){
-	    var str = sizes[size.id].diameter
-		+": \""
-		+sizes[size.id].trad+"\"";
-	    return str;  
+	var str = sizes()[size.id].diameter
+	    +": \""
+	    +sizes()[size.id].trad+"\"";
+	return str;  
     }
 
     function format_compact_text(size, container){
-       var str = sizes[size.id].diameter;
-       return str;
+	var str = sizes()[size.id].diameter;
+	return str;
     }
 
     // Check if the object is an array of strings or just a string
@@ -171,10 +193,10 @@ function WheelSelectBuilder(args){
 		+"Rarity</th></tr></table>";
 	}
 	return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
-	    sizes[size.id].diameter+"</td><td class=\"trad\">"+
-	    list_vals(sizes[size.id].trad)+"</td><td class=\"app\">"+
-	    list_vals(sizes[size.id].app)+"</td><td class=\"rarity\">"+
-	    capStr(sizes[size.id].rarity)+"</td></tr></table>";
+	    sizes()[size.id].diameter+"</td><td class=\"trad\">"+
+	    list_vals(sizes()[size.id].trad)+"</td><td class=\"app\">"+
+	    list_vals(sizes()[size.id].app)+"</td><td class=\"rarity\">"+
+	    capStr(sizes()[size.id].rarity)+"</td></tr></table>";
     }
 
     this.build = function(){
@@ -188,7 +210,7 @@ function WheelSelectBuilder(args){
 		formatSelection: format_simple,
 		formatNoMatches: noMatchesMsg,
 		dropdownCssClass: "wheel_select",
-		data: append_header(data_sizes_partial),
+		data: append_header(optns_partial),
 		placeholder: "Select a wheel size",
 		query: q_options,
                 multiple: allow_multiple
