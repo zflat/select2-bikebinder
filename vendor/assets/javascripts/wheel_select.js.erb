@@ -32,34 +32,19 @@ if (!Array.prototype.indexOf) {
     }
 }
 
-
-// Instantiate the i18n object
-var I18n = I18n || {}
-
-// Set default locale to english
-I18n.defaultLocale = I18n.defaultLocal || "en";
-
 function WheelSelectBuilder(args){
     var id = args.id;
     var allow_multiple = args.multiple;
     var selector = '#'+id;
     var loaded_full = false;
 
-    /* <%
-       msg_loc_def = I18n.translate('isobsd.messages', :locale=>I18n.default_locale)
-       default_msg = msg_loc_def.to_json.html_safe
-    %> */
-    var arr_msg = <%= default_msg %>;
-    if (I18n.translate){
-	arr_msg = I18n.translate('isobsd.messages');
-    }
+    var arr_msg = arr_msg = I18n.translate('isobsd.messages');
 
     var arr_bsd = {
 	common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
 	uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
 	rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
     };
-    var iso_bsd_sizes = <%= IsoBsdI18n::Size.all.hash_locale.to_json.html_safe %>;
 
     function Size(bsd){
 	this.bsd = bsd;
@@ -106,17 +91,6 @@ function WheelSelectBuilder(args){
 	    return val;
 	}
     }
-    /*
-    var sizes = function(){
-	var locale = I18n.locale || I18n.defaultLocale;
-	data = iso_bsd_sizes[locale];
-	// revert to default locale if no data is found
-	if(null == data){
-	    data = iso_bsd_sizes[I18n.defaultLocale];
-	}
-	return data
-    }
-    */
 
     function size_optns(rarity){
 	var list = [];
@@ -268,11 +242,6 @@ function WheelSelectBuilder(args){
     function format_compact_text(size, container){
 	var s = new Size(size.id);
 	return s.diameter();
-    }
-
-    // Check if the object is an array of strings or just a string
-    function is_list(arr){
-	return (arr[arr.length-1].length) > 1;
     }
 
     function list_vals(arr){
