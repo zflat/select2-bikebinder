@@ -74,25 +74,39 @@ function WheelSelectBuilder(args){
 	this.lookup_arr = function(key){
 	    obj = this.lookup(key);
 	    var arr = [];
-	    jQuery.each(obj, function(key, str){
-		    arr.push(str);
-		});
+	    if(obj.hasOwnProperty('length')){
+		// String
+		arr.push(obj);
+	    }else{
+		// List
+		jQuery.each(obj, function(key, str){
+			arr.unshift(str);
+		    });
+	    }
 	    return arr;
 	}
-	this.diameter = function(){return this.lookup('diameter')};
+	this.diameter = function(){return bsd+"mm"};
 	this.app = function(){return this.lookup_arr('app')};
 	this.trad = function(){return this.lookup_arr('trad')};
-	this.rarity = function(){
-	    var val = "n/a";
+	this.rarity_key = function(){
 	    jQuery.each(arr_bsd, function(key, list){
 		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(this.bsd)>=0){
-			val=I18n.translate('isobsd.rarity.'+key);
+			return key;
 		    }
 		});
+	}
+	this.rarity = function(){
+	    var val = "n/a";
+	    d = parseInt(bsd, 10);
+	    jQuery.each(arr_bsd, function(key, list){
+		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(d)>=0){
+			val = I18n.translate('isobsd.rarity.'+key);
+		    }
+		})
 	    return val;
 	}
     }
-
+    /*
     var sizes = function(){
 	var locale = I18n.locale || I18n.defaultLocale;
 	data = iso_bsd_sizes[locale];
@@ -102,6 +116,7 @@ function WheelSelectBuilder(args){
 	}
 	return data
     }
+    */
 
     function size_optns(rarity){
 	var list = [];
@@ -115,7 +130,6 @@ function WheelSelectBuilder(args){
 	var opt = [];
 	for(var i=0; i<list_desc.length; i++){
 	    var s_i = new Size(list_desc[i]);
-	    //var s_i = sizes()[list_desc[i]];
 	    opt.push({id:list_desc[i].toString(), text:s_i.diameter()});
 	}
 	return opt;
@@ -128,11 +142,7 @@ function WheelSelectBuilder(args){
 	var strBSD = ""+bsd;
 	var match_beginning = (strBSD.indexOf(term)==0);
 
-	var trad = sizes()[bsd].trad;
-	trad = is_list(trad)?
-	    trad:
-	    [trad];
-
+	var trad = (new Size(bsd)).trad();
 	var match_trad = false;
 
 	for(var i=0; i<trad.length; i++){
@@ -167,6 +177,8 @@ function WheelSelectBuilder(args){
 		optns_all:
 		optns_partial;
 	    choices = append_header(choices);
+	}else if(invalid_search(query.term)){
+	    choices = [];
 	}else{
 	    choices = linear_search(query.term, optns_all);
 	}
@@ -193,12 +205,17 @@ function WheelSelectBuilder(args){
 
     // stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript	
     function capStr(string){
-      return string.charAt(0).toUpperCase() + string.slice(1);
+	if(string == "n/a"){return string;}
+	return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function invalid_search(term){
+	return term.length<2;
     }
 
     function noMatchesMsg(term){
-	if(term.length<2)
-	    return capStr(arr_msg.seach_requirements);
+	if(invalid_search(term))
+	    return capStr(arr_msg.search_requirements);
 
 	var base_msg = 	capStr(arr_msg.search_no_found)+". ";
 
@@ -241,15 +258,16 @@ function WheelSelectBuilder(args){
     }
 
     function format_summary_text(size, container){
-	var str = sizes()[size.id].diameter
+	var s = new Size(size.id);
+	var str = s.bsd
 	    +": \""
-	    +sizes()[size.id].trad+"\"";
+	    +s.trad()+"\"";
 	return str;  
     }
 
     function format_compact_text(size, container){
-	var str = sizes()[size.id].diameter;
-	return str;
+	var s = new Size(size.id);
+	return s.diameter();
     }
 
     // Check if the object is an array of strings or just a string
@@ -259,19 +277,20 @@ function WheelSelectBuilder(args){
 
     function list_vals(arr){
 	strText = "";
-	if(is_list(arr)){
+	if(arr.length < 1){
+	    strText = "n/a";
+	}else if(arr.length == 1){
+	    strText = capStr(arr[0]);
+	}else{
 	    strText = "<ul class=\"attrib\">";
-	    for(ind in arr){
+	    for(var i=0; i<arr.length; i++){
 		strText +="<li>";
-		strText +=capStr(arr[ind]);
+		strText +=capStr(arr[i]);
 		strText +="</li>";
 	    }
 	    strText +="</ul>";
-	}else{
-	    if (arr != "n/a")
-		arr = capStr(arr);
-	    strText = arr;
 	}
+
 	return strText;
     }
 
@@ -283,11 +302,12 @@ function WheelSelectBuilder(args){
 		+capStr(arr_msg.header.app)+"</th><th class=\"rarity\">"
 		+capStr(arr_msg.header.rarity)+"</th></tr></table>";
 	}
+	s = new Size(size.id);
 	return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
-	    sizes()[size.id].diameter+"</td><td class=\"trad\">"+
-	    list_vals(sizes()[size.id].trad)+"</td><td class=\"app\">"+
-	    list_vals(sizes()[size.id].app)+"</td><td class=\"rarity\">"+
-	    capStr(sizes()[size.id].rarity)+"</td></tr></table>";
+	    s.diameter()+"</td><td class=\"trad\">"+
+	    list_vals(s.trad())+"</td><td class=\"app\">"+
+	    list_vals(s.app())+"</td><td class=\"rarity\">"+
+	    capStr(s.rarity())+"</td></tr></table>";
     }
 
     this.build = function(){
