@@ -1,3 +1,38 @@
+// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 1) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
+
+
 // Instantiate the i18n object
 var I18n = I18n || {}
 
@@ -26,6 +61,38 @@ function WheelSelectBuilder(args){
     };
     var iso_bsd_sizes = <%= IsoBsdI18n::Size.all.hash_locale.to_json.html_safe %>;
 
+    function Size(bsd){
+	this.bsd = bsd;
+	this.record = function(){
+	    return I18n.translate('isobsd.sizes.'+bsd);
+	}
+	// Attributes that have 1 record are returned as String
+	this.lookup = function(key){
+	    return this.record()[key];
+	}
+	// Attributes that have 0 or more records are returned as Arrays
+	this.lookup_arr = function(key){
+	    obj = this.lookup(key);
+	    var arr = [];
+	    jQuery.each(obj, function(key, str){
+		    arr.push(str);
+		});
+	    return arr;
+	}
+	this.diameter = function(){return this.lookup('diameter')};
+	this.app = function(){return this.lookup_arr('app')};
+	this.trad = function(){return this.lookup_arr('trad')};
+	this.rarity = function(){
+	    var val = "n/a";
+	    jQuery.each(arr_bsd, function(key, list){
+		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(this.bsd)>=0){
+			val=I18n.translate('isobsd.rarity.'+key);
+		    }
+		});
+	    return val;
+	}
+    }
+
     var sizes = function(){
 	var locale = I18n.locale || I18n.defaultLocale;
 	data = iso_bsd_sizes[locale];
@@ -47,8 +114,9 @@ function WheelSelectBuilder(args){
 
 	var opt = [];
 	for(var i=0; i<list_desc.length; i++){
-	    var s_i = sizes()[list_desc[i]];
-	    opt.push({id:list_desc[i].toString(), text:s_i.diameter});
+	    var s_i = new Size(list_desc[i]);
+	    //var s_i = sizes()[list_desc[i]];
+	    opt.push({id:list_desc[i].toString(), text:s_i.diameter()});
 	}
 	return opt;
     }
