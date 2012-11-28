@@ -32,19 +32,25 @@ if (!Array.prototype.indexOf) {
     }
 }
 
+
 function WheelSelectBuilder(args){
     var id = args.id;
     var allow_multiple = args.multiple;
     var selector = '#'+id;
     var loaded_full = false;
 
-    var arr_msg = arr_msg = I18n.translate('isobsd.messages');
-
-    var arr_bsd = {
-	common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
-	uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
-	rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
-    };
+    if(I18n && I18n.translate){
+	var arr_msg = I18n.translate('wheelui.messages');
+	arr_msg.not_applicable = I18n.translate('isobsd.messages.not_applicable');
+	
+	var arr_bsd = {
+	    common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
+	    uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
+	    rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
+	};
+    }else{
+	throw(new Error("I18n not supported"));
+    }
 
     function Size(bsd){
 	this.bsd = bsd;
@@ -59,7 +65,10 @@ function WheelSelectBuilder(args){
 	this.lookup_arr = function(key){
 	    obj = this.lookup(key);
 	    var arr = [];
-	    if(obj.hasOwnProperty('length')){
+	    if(null == obj){
+		// null
+		arr.push(arr_msg.not_applicable);
+	    }else if(obj.hasOwnProperty('length')){
 		// String
 		arr.push(obj);
 	    }else{
@@ -81,7 +90,7 @@ function WheelSelectBuilder(args){
 		});
 	}
 	this.rarity = function(){
-	    var val = "n/a";
+	    var val = arr_msg.not_applicable;
 	    d = parseInt(bsd, 10);
 	    jQuery.each(arr_bsd, function(key, list){
 		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(d)>=0){
@@ -108,7 +117,7 @@ function WheelSelectBuilder(args){
 	}
 	return opt;
     }
-
+    
     var optns_partial = size_optns(['common', 'uncommon']);
     var optns_all = size_optns(['common', 'uncommon', 'rare']);
 
@@ -179,7 +188,7 @@ function WheelSelectBuilder(args){
 
     // stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript	
     function capStr(string){
-	if(string == "n/a"){return string;}
+	if(string == arr_msg.not_applicable){return string;}
 	return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
@@ -211,11 +220,42 @@ function WheelSelectBuilder(args){
     function conditionalClear(e){        
         if(e.val == "header"){
 	    clear_selection();
-        } 
+        } else if(e.added && e.added.id == "header"){
+	    remove_header_msel();
+	}
     }
 
     function clear_selection(){
 	$(selector).select2("data","");
+    }
+
+    /*
+      Remove the header by iterating over each element
+      and only keeping elements without header id.
+     */
+    function remove_header_msel(){
+	var d0 = $(selector).select2("data");
+	var data = [];
+	jQuery.each(d0, function(){
+		if(this.id !="header"){
+		    data.push(this);
+		}
+	    });
+	$(selector).select2("data", data);
+    }
+
+    function init_selection(element, callback){
+	if(allow_multiple){
+	    var data = [];
+	    $(element.val().split(",")).each(function () {
+		    var str = jQuery.trim(this);
+		    data.push({id: str, text: str});
+		});
+	    callback(data);
+	}else{
+	    str = element.val();
+	    callback({id:str, text:str});	    
+	}
     }
 
     function format_simple(size, container){
@@ -247,7 +287,7 @@ function WheelSelectBuilder(args){
     function list_vals(arr){
 	strText = "";
 	if(arr.length < 1){
-	    strText = "n/a";
+	    strText = arr_msg.not_applicable;
 	}else if(arr.length == 1){
 	    strText = capStr(arr[0]);
 	}else{
@@ -291,13 +331,16 @@ function WheelSelectBuilder(args){
 		formatNoMatches: noMatchesMsg,
 		dropdownCssClass: "wheel_select",
 		data: append_header(optns_partial),
-		placeholder: capStr(arr_msg['select_placeholder']),
 		query: q_options,
-                multiple: allow_multiple
+		placeholder: capStr(arr_msg['select_placeholder']),
+		multiple: allow_multiple,
+		initSelection: init_selection
 	    });
-
+	
 	$("*.wheel_select").on("click", load_full_selector(), load_full);
 	$(selector).on("change",conditionalClear);
+	
     }
 
 } 
+
