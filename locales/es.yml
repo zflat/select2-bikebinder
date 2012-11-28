@@ -2,6 +2,7 @@ es:
   wheelui:
     messages:
       :select_placeholder: seleccionar un tamaño de rueda
+      :select_placeholder_compact: tamaño de rueda
       :search_requirements: por favor, la entrada 2 o más caracteres
       :search_no_found: no se han encontrado resultados
       :full_list_link: vea la lista completa para más opciones

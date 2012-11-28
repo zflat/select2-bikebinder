@@ -38,6 +38,7 @@ function WheelSelectBuilder(args){
     var allow_multiple = args.multiple;
     var selector = '#'+id;
     var loaded_full = false;
+    var disp_compact = args.compact;
 
     if(I18n && I18n.translate){
 	var arr_msg = I18n.translate('wheelui.messages');
@@ -50,6 +51,12 @@ function WheelSelectBuilder(args){
 	};
     }else{
 	throw(new Error("I18n not supported"));
+    }
+
+    function strPlaceholder(){
+	return (disp_compact != null)?
+	    arr_msg.select_placeholder_compact:
+	    arr_msg.select_placeholder;
     }
 
     function Size(bsd){
@@ -172,7 +179,7 @@ function WheelSelectBuilder(args){
 
 
     function append_header(choices){
-	header_option = {id:'header', text:capStr(arr_msg.select_placeholder)}
+	header_option = {id:'header', text:capStr(strPlaceholder())}
 	a = choices.slice();
 	a.unshift(header_option);
 	return a;
@@ -332,7 +339,7 @@ function WheelSelectBuilder(args){
 		dropdownCssClass: "wheel_select",
 		data: append_header(optns_partial),
 		query: q_options,
-		placeholder: capStr(arr_msg['select_placeholder']),
+		placeholder: capStr(strPlaceholder()),
 		multiple: allow_multiple,
 		initSelection: init_selection
 	    });
