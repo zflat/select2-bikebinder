@@ -147,54 +147,63 @@ function WheelSelectBuilder(args){
 	return match_beginning || match_trad;
     }
 
-    function choice_skip(choice){
-	var in_selection = false;
-	// verify that the choice is not already selected
+    function in_selection(id){
+	var bln_in_selection = false;
+	// verify that the item with given id is not already selected
 	selection = $(selector).select2("data");
-	for (var i=0; i<selection.length; i++){
-	    if (selection[i].id == choice){
-		in_selection = true;
-	    }
-	}
-	return in_selection;
-    }
-
-    function linear_search(term, choices){
-	var matches = [];
-	var c;
-	for(var i=0; i<choices.length; i++){
-	    c = choices[i].id;
-	    if(!choice_skip(c)){
-		if(matcher(term, c)){
-		    matches.unshift(choices[i]);
+	if(null != selection){
+	    for (var i=0; i<selection.length; i++){
+		if (selection[i].id == id){
+		    bln_in_selection = true;
 		}
 	    }
 	}
-	return matches;
+	return bln_in_selection;
     }
 
+    function linear_search(term, choices){
+	var arr_matches = [];
+	var arr_selected = [];
+	var c;
+	for(var i=0; i<choices.length; i++){
+	    c = choices[i];
+	 
+	    if(matcher(term, c.id)){
+		if(in_selection(c.id)){
+		    arr_selected.unshift(c.id);
+		}else{
+		    arr_matches.unshift(c);
+		}
+	    }
+	}
+	return {
+	    matches:arr_matches, 
+	    pre_selected:arr_selected
+	};
+    }
 
     function q_options(query){
+	var term = query.term
         var more=false;
         var context=null;
 	var choices = [];
 
-	if(query.term == ""){
+	if(term == ""){
 	    choices = (loaded_full)?
 		optns_all:
 		optns_partial;
 	    choices = append_header(choices);
-	}else if(invalid_search(query.term)){
+	}else if(invalid_search(term)){
 	    choices = [];
 	}else{
-	    choices = linear_search(query.term, optns_all);
+	    choices = linear_search(term, optns_all);
+	    choices = choices.matches;
 	}
 
-	data = {results: choices, more: false, context: null};
+	var data = {results: choices, more: false, context: null};
 	query.callback(data);
-     }
-
-
+    }
+    
     function append_header(choices){
 	header_option = {id:'header', text:capStr(strPlaceholder())}
 	a = choices.slice();
@@ -220,22 +229,35 @@ function WheelSelectBuilder(args){
 	return term.length<2;
     }
 
+    /*
+      Provides message based on conditions:
+      * Loaded full
+      * The search term gives a match that is already selected
+     */
     function noMatchesMsg(term){
 	if(invalid_search(term))
 	    return capStr(arr_msg.search_requirements);
+	
+	// determine if the term matches existing selection
+	var search_res = linear_search(term, $(selector).select2("data"));
+	var is_pre_selected = (search_res.pre_selected.length >0 );
 
-	var base_msg = 	capStr(arr_msg.search_no_found)+". ";
+	var base_msg = 	
+	    capStr((is_pre_selected)?
+		   arr_msg.search_already_selected:
+		   arr_msg.search_no_found );
 
+	base_msg += ". ";
 	var text = loaded_full?
 	    base_msg:
-	    base_msg + "<a id=\""+
+	    base_msg + "<br /><a id=\""+
 	    load_full_id()+"\" href=\"#\">"+capStr(arr_msg.full_list_link)+"</a>.";
 
 	return text;
     }
     function load_full(event){
+	// change state to loaded_full
 	loaded_full = true;
-	clear_selection();
 	$(selector).select2("close");	
 	$(selector).select2("open");	
 	return false;
