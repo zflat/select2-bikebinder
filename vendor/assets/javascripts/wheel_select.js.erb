@@ -135,6 +135,7 @@ function WheelSelectBuilder(args){
 	var trad = (new Size(bsd)).trad();
 	var match_trad = false;
 
+
 	for(var i=0; i<trad.length; i++){
 	    val = trad[i];
 	    if((val.indexOf(term) >=0)){
@@ -146,11 +147,27 @@ function WheelSelectBuilder(args){
 	return match_beginning || match_trad;
     }
 
+    function choice_skip(choice){
+	var in_selection = false;
+	// verify that the choice is not already selected
+	selection = $(selector).select2("data");
+	for (var i=0; i<selection.length; i++){
+	    if (selection[i].id == choice){
+		in_selection = true;
+	    }
+	}
+	return in_selection;
+    }
+
     function linear_search(term, choices){
 	var matches = [];
+	var c;
 	for(var i=0; i<choices.length; i++){
-	    if(matcher(term, choices[i].id)){
-		matches.unshift(choices[i]);
+	    c = choices[i].id;
+	    if(!choice_skip(c)){
+		if(matcher(term, c)){
+		    matches.unshift(choices[i]);
+		}
 	    }
 	}
 	return matches;
