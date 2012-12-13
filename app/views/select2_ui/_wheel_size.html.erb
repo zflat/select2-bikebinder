@@ -1,0 +1,12 @@
+<script type="text/javascript">
+I18n.locale = "<%= I18n::locale %>";
+var sel_<%= id %> = new WheelSelectBuilder({id:"<%= id %>", multiple:<%= multiple %>});  
+     
+$(document).ready(
+  function() { 
+     sel_<%= id %>.build();
+   }
+);
+</script>
+
+<input type="hidden" id=<%= id %> style="width:400px" value="" />

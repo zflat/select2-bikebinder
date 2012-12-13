@@ -25,9 +25,11 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<rspec>, [">= 1.3.0"])
   s.add_development_dependency(%q<bundler>, ["~> 1.2"])
   s.add_development_dependency( "iso_bsd-i18n", ">= 0")
+  s.add_development_dependency( "color_name-i18n", ">= 0")
 
   s.add_dependency(%q<bundler>, ["~> 1.2"])
   s.add_dependency( "iso_bsd-i18n", ">= 0")
+  s.add_dependency( "color_name-i18n", ">= 0")
 
 end
 
