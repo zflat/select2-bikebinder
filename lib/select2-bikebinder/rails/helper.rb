@@ -14,15 +14,25 @@ end
 module Select2BikeBinder
 
   module ViewHelper
-    def self.helper(id)
-      "nthis output is from an app-wide helper method that is declared within the gem"
-    end
 
     def self.wheel_select(obj, options = {}, &block)
-      options[:multiple] ||= false;
-      concat_partial(obj, 'select2_ui/wheel_size', options, &block)
+      concat_partial(obj, 'select2_ui/wheel_size', 
+                     merge_default_options(options), &block)
     end
 
+    def self.color_select(obj, options = {}, &block)
+      concat_partial(obj, 'select2_ui/color', 
+                     merge_default_options(options), &block)
+    end
+
+    private
+
+    def self.merge_default_options(optns)
+      optns[:multiple] ||= false
+      optns[:init_val] ||=''
+      optns[:width] ||='400px'
+      optns
+    end
 
     # Only need this helper once, it will provide an interface to convert a block into a partial.
     # 1. Capture is a Rails helper which will 'capture' the output of a block into a variable

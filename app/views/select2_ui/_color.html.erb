@@ -1,0 +1,18 @@
+<script type="text/javascript">
+I18n.locale = "<%= I18n::locale %>";
+var sel_<%= id %>;// = new WheelSelectBuilder({id:"<%= id %>", multiple:<%= multiple %>});  
+     
+$(document).ready(
+  function() { 
+      //sel_<%= id %>.build();
+   }
+);
+</script>
+
+<select id=<%= id %> style="width:400px" data-placeholder="Select a color">
+  <option value="">Select a color</option>
+  <%   ColorNameI18n::keys.each do |k|     %>
+  <% n = ColorNameI18n::Color.new(k).name.capitalize %>
+  <option value="<%= k %>"><%= n %></option>
+  <% end %>
+</select>
