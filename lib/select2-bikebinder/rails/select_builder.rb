@@ -7,7 +7,8 @@ module Select2BikeBinder
         {
           :multiple => false,
           :compact => false,
-          :value => ""
+          :value => "",
+          :width=>nil
         }
       end
 
@@ -26,7 +27,7 @@ module Select2BikeBinder
       end
 
       def css_style
-        "width:#{width}"
+        "width:#{width}" if width
       end
 
       def initialize(id, optns = {})

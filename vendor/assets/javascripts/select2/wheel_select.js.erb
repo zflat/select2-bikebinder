@@ -1,0 +1,357 @@
+function WheelSelectBuilder(args){
+    var id = args.id;
+    var allow_multiple = args.multiple;
+    var selector = '#'+id;
+    var loaded_full = false;
+    var disp_compact = args.compact;
+
+    if(I18n && I18n.translate){
+	var arr_msg = I18n.translate('wheelui.messages');
+	arr_msg.not_applicable = I18n.translate('isobsd.messages.not_applicable');
+	
+	var arr_bsd = {
+	    common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
+	    uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
+	    rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
+	};
+    }else{
+	throw(new Error("I18n not supported"));
+    }
+
+    function strPlaceholder(){
+	return (disp_compact) ?
+	    arr_msg.select_placeholder_compact:
+	    arr_msg.select_placeholder;
+    }
+
+    function Size(bsd){
+	this.bsd = bsd;
+	this.record = function(){
+	    return I18n.translate('isobsd.sizes.'+bsd);
+	}
+	// Attributes that have 1 record are returned as String
+	this.lookup = function(key){
+	    return this.record()[key];
+	}
+	// Attributes that have 0 or more records are returned as Arrays
+	this.lookup_arr = function(key){
+	    obj = this.lookup(key);
+	    var arr = [];
+	    if(null == obj){
+		// null
+		arr.push(arr_msg.not_applicable);
+	    }else if(obj.hasOwnProperty('length')){
+		// String
+		arr.push(obj);
+	    }else{
+		// List
+		jQuery.each(obj, function(key, str){
+			arr.push(str);
+		    });
+	    }
+	    return arr;
+	}
+	this.diameter = function(){return bsd+"mm"};
+	this.app = function(){return this.lookup_arr('app')};
+	this.trad = function(){return this.lookup_arr('trad')};
+	this.rarity_key = function(){
+	    jQuery.each(arr_bsd, function(key, list){
+		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(this.bsd)>=0){
+			return key;
+		    }
+		});
+	}
+	this.rarity = function(){
+	    var val = arr_msg.not_applicable;
+	    d = parseInt(bsd, 10);
+	    jQuery.each(arr_bsd, function(key, list){
+		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(d)>=0){
+			val = I18n.translate('isobsd.rarity.'+key);
+		    }
+		})
+	    return val;
+	}
+    }
+
+    function size_optns(rarity){
+	var list = [];
+	for (var r=0; r<rarity.length; r++){
+	    list = list.concat(arr_bsd[rarity[r]]);
+	}
+	// Sorting in descending order
+	// http://www.javascriptkit.com/javatutors/arraysort.shtml
+	var list_desc = list.sort(function (a,b){return b-a});
+
+	var opt = [];
+	for(var i=0; i<list_desc.length; i++){
+	    var s_i = new Size(list_desc[i]);
+	    opt.push({id:list_desc[i].toString(), text:s_i.diameter()});
+	}
+	return opt;
+    }
+    
+    var optns_partial = size_optns(['common', 'uncommon']);
+    var optns_all = size_optns(['common', 'uncommon', 'rare']);
+
+    function matcher(term, bsd){
+	var strBSD = ""+bsd;
+	var match_beginning = (strBSD.indexOf(term)==0);
+
+	var trad = (new Size(bsd)).trad();
+	var match_trad = false;
+
+
+	for(var i=0; i<trad.length; i++){
+	    val = trad[i];
+	    if((val.indexOf(term) >=0)){
+		match_trad = true;
+		break;
+	    }
+	}
+
+	return match_beginning || match_trad;
+    }
+
+    function in_selection(id){
+	var bln_in_selection = false;
+	// verify that the item with given id is not already selected
+	selection = $(selector).select2("data");
+	if(null != selection){
+	    for (var i=0; i<selection.length; i++){
+		if (selection[i].id == id){
+		    bln_in_selection = true;
+		}
+	    }
+	}
+	return bln_in_selection;
+    }
+
+    function linear_search(term, choices){
+	var arr_matches = [];
+	var arr_selected = [];
+	var c;
+	for(var i=0; i<choices.length; i++){
+	    c = choices[i];
+	 
+	    if(matcher(term, c.id)){
+		if(in_selection(c.id)){
+		    arr_selected.unshift(c.id);
+		}else{
+		    arr_matches.unshift(c);
+		}
+	    }
+	}
+	return {
+	    matches:arr_matches, 
+	    pre_selected:arr_selected
+	};
+    }
+
+    function q_options(query){
+	var term = query.term
+        var more=false;
+        var context=null;
+	var choices = [];
+
+	if(term == ""){
+	    choices = (loaded_full)?
+		optns_all:
+		optns_partial;
+	    choices = append_header(choices);
+	}else if(invalid_search(term)){
+	    choices = [];
+	}else{
+	    choices = linear_search(term, optns_all);
+	    choices = choices.matches;
+	}
+
+	var data = {results: choices, more: false, context: null};
+	query.callback(data);
+    }
+    
+    function append_header(choices){
+	header_option = {id:'header', text:capStr(strPlaceholder())}
+	a = choices.slice();
+	a.unshift(header_option);
+	return a;
+    }
+
+    function load_full_id(){
+	return "no_size_match_" + id;
+    }
+
+    function load_full_selector(){
+	return "#" + load_full_id();
+    }
+
+    // stackoverflow.com/questions/1026069/capitalize-the-first-letter-of-string-in-javascript	
+    function capStr(string){
+	if(string == arr_msg.not_applicable){return string;}
+	return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function invalid_search(term){
+	return term.length<2;
+    }
+
+    /*
+      Provides message based on conditions:
+      * Loaded full
+      * The search term gives a match that is already selected
+     */
+    function noMatchesMsg(term){
+	if(invalid_search(term))
+	    return capStr(arr_msg.search_requirements);
+	
+	// determine if the term matches existing selection
+	var search_res = linear_search(term, $(selector).select2("data"));
+	var is_pre_selected = (search_res.pre_selected.length >0 );
+
+	var base_msg = 	
+	    capStr((is_pre_selected)?
+		   arr_msg.search_already_selected:
+		   arr_msg.search_no_found );
+
+	base_msg += ". ";
+	var text = loaded_full?
+	    base_msg:
+	    base_msg + "<br /><a id=\""+
+	    load_full_id()+"\" href=\"#\">"+capStr(arr_msg.full_list_link)+"</a>.";
+
+	return text;
+    }
+    function load_full(event){
+	// change state to loaded_full
+	loaded_full = true;
+	$(selector).select2("close");	
+	$(selector).select2("open");	
+	return false;
+    }
+
+    function conditionalClear(e){        
+        if(e.val == "header"){
+	    clear_selection();
+        } else if(e.added && e.added.id == "header"){
+	    remove_header_msel();
+	}
+    }
+
+    function clear_selection(){
+	$(selector).select2("data","");
+    }
+
+    /*
+      Remove the header by iterating over each element
+      and only keeping elements without header id.
+     */
+    function remove_header_msel(){
+	var d0 = $(selector).select2("data");
+	var data = [];
+	jQuery.each(d0, function(){
+		if(this.id !="header"){
+		    data.push(this);
+		}
+	    });
+	$(selector).select2("data", data);
+    }
+
+    function init_selection(element, callback){
+	if(allow_multiple){
+	    var data = [];
+	    $(element.val().split(",")).each(function () {
+		    var str = jQuery.trim(this);
+		    data.push({id: str, text: str});
+		});
+	    callback(data);
+	}else{
+	    str = element.val();
+	    callback({id:str, text:str});	    
+	}
+    }
+
+    function format_simple(size, container){
+	if(!size.id){
+	    return "";
+	}else if(size.id!="header") {
+           var str = (allow_multiple) ? 
+           format_compact_text(size, container) :
+           format_summary_text(size, container); 
+           return str;
+	}else{
+	    return "";
+	}
+    }
+
+    function format_summary_text(size, container){
+	var s = new Size(size.id);
+	var str = s.bsd
+	    +": \""
+	    +s.trad()+"\"";
+	return str;  
+    }
+
+    function format_compact_text(size, container){
+	var s = new Size(size.id);
+	return s.diameter();
+    }
+
+    function list_vals(arr){
+	strText = "";
+	if(arr.length < 1){
+	    strText = arr_msg.not_applicable;
+	}else if(arr.length == 1){
+	    strText = capStr(arr[0]);
+	}else{
+	    strText = "<ul class=\"attrib\">";
+	    for(var i=0; i<arr.length; i++){
+		strText +="<li>";
+		strText +=capStr(arr[i]);
+		strText +="</li>";
+	    }
+	    strText +="</ul>";
+	}
+
+	return strText;
+    }
+
+    function format_complete(size){
+	if(size.id=="header") {
+	    return "<table class=\"wheel_opt\"><tr><th class=\"iso\">"
+		+capStr(arr_msg.header.iso)+"</th><th class=\"trad\">"
+		+capStr(arr_msg.header.trad)+"</th><th class=\"app\">"
+		+capStr(arr_msg.header.app)+"</th><th class=\"rarity\">"
+		+capStr(arr_msg.header.rarity)+"</th></tr></table>";
+	}
+	s = new Size(size.id);
+	return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
+	    s.diameter()+"</td><td class=\"trad\">"+
+	    list_vals(s.trad())+"</td><td class=\"app\">"+
+	    list_vals(s.app())+"</td><td class=\"rarity\">"+
+	    capStr(s.rarity())+"</td></tr></table>";
+    }
+
+    this.build = function(){
+	$(selector).select2({
+		dropdownCss: {"background":"ccf", 
+			      "width":"700px", 
+			      "border":"1px solid #999", 
+			      "padding-top":"3px"},
+		allowClear: true,
+		formatResult: format_complete,
+		formatSelection: format_simple,
+		formatNoMatches: noMatchesMsg,
+		dropdownCssClass: "wheel_select",
+		data: append_header(optns_partial),
+		query: q_options,
+		placeholder: capStr(strPlaceholder()),
+		multiple: allow_multiple,
+		initSelection: init_selection
+	    });
+	
+	$("*.wheel_select").on("click", load_full_selector(), load_full);
+	$(selector).on("change",conditionalClear);
+	
+    }
+
+} 
+

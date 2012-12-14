@@ -1,18 +1,8 @@
-<% id = color_select.id %>
-<% multiple = color_select.multiple %>
-<script type="text/javascript">
-I18n.locale = "<%= I18n::locale %>";
-var sel_<%= id %>;// = new WheelSelectBuilder({id:"<%= id %>", multiple:<%= multiple %>});  
-     
-$(document).ready(
-  function() { 
-      //sel_<%= id %>.build();
-   }
-);
-</script>
+<% obj = color_select %>
 
-<select id=<%= id %> style="width:400px" data-placeholder="Select a color">
-  <option value="">Select a color</option>
+
+<select id="<%= obj.id %>" style="<%= obj.css_style %>" class="<%= obj.css_class %>">
+  <option value=""></option>
   <%   ColorNameI18n::keys.each do |k|     %>
   <% n = ColorNameI18n::Color.new(k).name.capitalize %>
   <option value="<%= k %>"><%= n %></option>

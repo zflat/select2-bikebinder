@@ -1,4 +1,9 @@
 en:
+  sel2ui:
+    messages:
+      :search_requirements: please enter 2 or more characters
+      :search_no_found: no matches found
+      :search_already_selected: matching options already selected
   wheelui:
     messages:
       :select_placeholder: select a wheel size
@@ -12,3 +17,8 @@ en:
         :trad: traditional name
         :app: application
         :rarity: rarity
+  colorselui:
+    messages:
+      :select_placeholder: select a color
+      :select_placeholder_compact: color
+

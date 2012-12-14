@@ -13,6 +13,8 @@ module Select2BikeBinder
     end
 
     class ColorSelect < SelectBuilder
+      def self.selector_class; "color_sel" end
+
       def default_options
         super.merge({:width=>'200px'})
       end
