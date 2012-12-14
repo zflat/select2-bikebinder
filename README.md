@@ -42,7 +42,7 @@ Clone the select2-bikebinder repository, build then install
 
 ### Include javascript assets
 
-Add the following dependets to your `app/assets/javascripts/application.js`:
+Add the following to your `app/assets/javascripts/application.js`:
 
 	//= require select2
 	//= require i18n
@@ -73,16 +73,11 @@ Add to your `app/assets/stylesheets/application.css`:
 	
 	</script>
 	
-	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new(
-	'e2b', :multiple=>true, :value=>"622,559,630") %>
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e2b', :multiple=>true, :value=>"622,559,630") %>
 
-	<br />
-	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new( 
-	'e1b', :value=>'591') %>
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e1b', :value=>'591') %>
 
-	<br />
-	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new( 
-	e3b', :width=>'200px', :multiple=>true, :compact=>true) %>
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e3b', :width=>'200px', :multiple=>true, :compact=>true) %>
 
 
 # License
