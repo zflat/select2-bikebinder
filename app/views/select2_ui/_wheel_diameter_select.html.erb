@@ -1,3 +1,10 @@
+<% obj = wheel_diameter_select %>
+<% id = obj.id %>
+<% multiple = obj.multiple %>
+<% init_val = obj.value %>
+<% width = obj.width || "" %>
+<% compact = obj.compact || "" %>
+
 <script type="text/javascript">
 I18n.locale = "<%= I18n::locale %>";
 var sel_<%= id %> = new WheelSelectBuilder({id:"<%= id %>", multiple:<%= multiple %>});  

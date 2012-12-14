@@ -16,7 +16,7 @@ module Select2BikeBinder
   module ViewHelper
 
     def self.wheel_select(obj, options = {}, &block)
-      concat_partial(obj, 'select2_ui/wheel_size', 
+      concat_partial(obj, 'select2_ui/wheel_diameter', 
                      merge_default_options(options), &block)
     end
 
