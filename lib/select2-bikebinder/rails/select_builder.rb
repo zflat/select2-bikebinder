@@ -15,6 +15,20 @@ module Select2BikeBinder
         "select2_ui"
       end
 
+      def css_class
+        unless @css
+          @css = self.class.selector_class
+          [:multiple, :compact].each do |flag|
+            @css += " #{flag}" if self.send(flag)
+          end
+        end
+        @css
+      end
+
+      def css_style
+        "width:#{width}"
+      end
+
       def initialize(id, optns = {})
         @id = id
         @opt = optns

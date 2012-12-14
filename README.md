@@ -33,21 +33,24 @@ Clone the select2-bikebinder repository, build then install
 	gem build select2-bikebinder.gemspec
 	gem install select2-bikebinder-VER.gem
 
-## Basic Usage for Wheel Select
+## Basic Usage 
 
-
-### Include javascript assets
-
-Add the following to your `app/assets/javascripts/application.js`:
-
-	//= require select2
-	//= require i18n
-	//= require i18n/translations
-	//= require wheel_select2
 
 ### Run the setup for i18n
 
 	rake i18n:js:setup
+
+### Include javascript assets
+
+Add the following dependets to your `app/assets/javascripts/application.js`:
+
+	//= require select2
+	//= require i18n
+	//= require i18n/translations
+	//= require select2_builder
+	//
+	// scripts for each select2 interface element
+	//= require wheel_select
 
 ### Include select2-rails stylesheet assets
 
@@ -60,20 +63,27 @@ Add to your `app/assets/stylesheets/application.css`:
 
 	<script type="text/javascript">
 	I18n.locale = "<%= I18n::locale %>"; //specify locale
-	var s1 = new WheelSelectBuilder({id:"e1", multiple:false});  
-	var s2 = new WheelSelectBuilder({id:"e2", multiple:true});  
 	     
 	$(document).ready(
 	  function() { 
-	     s1.build();
-	     s2.build();
+	     select_init(WheelSelectBuilder, 
+	     {selector:"<%="*.#{Select2BikeBinder::Builder::WheelDiameterSelect.selector_class}"%>"});
 	   }
 	);
+	
 	</script>
-		
-	<input type="hidden" id="e1" style="width:400px"  />
+	
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new(
+	'e2b', :multiple=>true, :value=>"622,559,630") %>
+
 	<br />
-	<input type="hidden" id="e2" style="width:400px" data-placeholder="Select a wheel size" />
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new( 
+	'e1b', :value=>'591') %>
+
+	<br />
+	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new( 
+	e3b', :width=>'200px', :multiple=>true, :compact=>true) %>
+
 
 # License
 

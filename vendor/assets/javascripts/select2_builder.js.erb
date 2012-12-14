@@ -1,0 +1,15 @@
+function select_init(builder, args){
+    var selector = args.selector
+    jQuery.each(jQuery(selector), function(index){
+	    // get the id
+	    var id = this.id
+	    var input = jQuery('#'+id);
+
+	    // get options
+	    var mul = input.hasClass('multiple');
+	    var comp = input.hasClass('compact');
+
+	    var sel = new builder({id:this.id, multiple:mul, compact:comp})
+	    sel.build();
+	});
+}

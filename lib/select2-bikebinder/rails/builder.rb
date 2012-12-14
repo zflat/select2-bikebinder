@@ -3,8 +3,10 @@ require_relative 'select_builder'
 
 module Select2BikeBinder
   module Builder
-    
+
     class WheelDiameterSelect < SelectBuilder
+      def self.selector_class; "wheel_diameter" end
+        
       def default_options
         super.merge({:width=>'400px'})
       end
