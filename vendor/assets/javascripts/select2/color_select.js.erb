@@ -1,9 +1,6 @@
-// can move this to another file?
-
-
 (function(){
     var ColorSelectBuilder = function(conf){
-	var color_optns = <%= ColorNameI18n::keys.to_json.html_safe  %>
+	var color_optns = <%= ColorNameI18n::keys.to_json.html_safe  %>;
 
 	if(!I18n || !I18n.translate){
 	    throw(new Error("I18n not supported"))
@@ -12,7 +9,6 @@
 	var configs = sel2mix.parsed_conf(conf)
 
 	// lets mix!
-	//sel2mix.asOptionSetter.call(optns, options)
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('colorselui.messages'),
 	     I18n.translate('sel2ui.messages')])
