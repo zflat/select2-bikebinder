@@ -22,6 +22,18 @@ module Select2BikeBinder
           expect(@b.multiple).to_not eq(nil)
         end
 
+        it "should have flags" do
+          expect(@b.flags).to_not eq(nil)
+        end
+
+        it "should have flag multiple" do
+          expect(@b.multiple?).to eq(@b.multiple)
+        end
+
+        it "should have flag compact" do
+          expect(@b.compact?).to eq(@b.compact)
+        end
+
         it "should have the correct id attribute" do
           expect(@b.id).to eq(@id)
         end
