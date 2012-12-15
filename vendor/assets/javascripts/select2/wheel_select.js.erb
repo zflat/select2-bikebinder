@@ -1,9 +1,9 @@
 function WheelSelectBuilder(args){
-    var id = args.id;
-    var allow_multiple = args.multiple;
-    var selector = '#'+id;
-    var loaded_full = false;
-    var disp_compact = args.compact;
+    var id = args.id
+    var allow_multiple = args.multiple
+    var selector = '#'+id
+    var loaded_full = false
+    var disp_compact = args.compact
 
     if(I18n && I18n.translate){
 	var arr_msg = I18n.translate('wheelui.messages');
@@ -13,7 +13,7 @@ function WheelSelectBuilder(args){
 	    common:	<%= IsoBsdI18n::Rarity::get(:common).hash.keys.to_json.html_safe %>,
 	    uncommon:<%= IsoBsdI18n::Rarity::get(:uncommon).hash.keys.to_json.html_safe %>,
 	    rare:	<%= IsoBsdI18n::Rarity::get(:rare).hash.keys.to_json.html_safe %>,
-	};
+	}
     }else{
 	throw(new Error("I18n not supported"));
     }
@@ -25,58 +25,58 @@ function WheelSelectBuilder(args){
     }
 
     function Size(bsd){
-	this.bsd = bsd;
+	this.bsd = bsd
 	this.record = function(){
-	    return I18n.translate('isobsd.sizes.'+bsd);
+	    return I18n.translate('isobsd.sizes.'+bsd)
 	}
 	// Attributes that have 1 record are returned as String
 	this.lookup = function(key){
-	    return this.record()[key];
+	    return this.record()[key]
 	}
 	// Attributes that have 0 or more records are returned as Arrays
 	this.lookup_arr = function(key){
-	    obj = this.lookup(key);
-	    var arr = [];
+	    obj = this.lookup(key)
+	    var arr = []
 	    if(null == obj){
 		// null
-		arr.push(arr_msg.not_applicable);
+		arr.push(arr_msg.not_applicable)
 	    }else if(obj.hasOwnProperty('length')){
 		// String
-		arr.push(obj);
+		arr.push(obj)
 	    }else{
 		// List
 		jQuery.each(obj, function(key, str){
-			arr.push(str);
-		    });
+			arr.push(str)
+		    })
 	    }
-	    return arr;
+	    return arr
 	}
-	this.diameter = function(){return bsd+"mm"};
-	this.app = function(){return this.lookup_arr('app')};
-	this.trad = function(){return this.lookup_arr('trad')};
+	this.diameter = function(){return bsd+"mm"}
+	this.app = function(){return this.lookup_arr('app')}
+	this.trad = function(){return this.lookup_arr('trad')}
 	this.rarity_key = function(){
 	    jQuery.each(arr_bsd, function(key, list){
 		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(this.bsd)>=0){
-			return key;
-		    }
-		});
-	}
-	this.rarity = function(){
-	    var val = arr_msg.not_applicable;
-	    d = parseInt(bsd, 10);
-	    jQuery.each(arr_bsd, function(key, list){
-		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(d)>=0){
-			val = I18n.translate('isobsd.rarity.'+key);
+			return key
 		    }
 		})
-	    return val;
+	}
+	this.rarity = function(){
+	    var val = arr_msg.not_applicable
+	    d = parseInt(bsd, 10)
+	    jQuery.each(arr_bsd, function(key, list){
+		    if(arr_bsd.hasOwnProperty(key) && list.indexOf(d)>=0){
+			val = I18n.translate('isobsd.rarity.'+key)
+		    }
+		})
+	    return val
 	}
     }
 
     function size_optns(rarity){
 	var list = [];
 	for (var r=0; r<rarity.length; r++){
-	    list = list.concat(arr_bsd[rarity[r]]);
+	    list = list.concat(arr_bsd[rarity[r]])
 	}
 	// Sorting in descending order
 	// http://www.javascriptkit.com/javatutors/arraysort.shtml

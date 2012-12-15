@@ -47,10 +47,11 @@ Add the following to your `app/assets/javascripts/application.js`:
 	//= require select2
 	//= require i18n
 	//= require i18n/translations
-	//= require select2_builder
+	//= require select2/select2_builder
 	//
 	// scripts for each select2 interface element
-	//= require wheel_select
+	//= require select2/wheel_select
+	//= require select2/color_select
 
 ### Include select2-rails stylesheet assets
 

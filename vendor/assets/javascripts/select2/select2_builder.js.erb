@@ -32,18 +32,267 @@ if (!Array.prototype.indexOf) {
     }
 }
 
-function select_init(builder, args){
-    var selector = args.selector
-    jQuery.each(jQuery(selector), function(index){
+
+// define namespaces sel2 and sel2mod
+var sel2 = {}, sel2mix = {};
+
+(function (){
+
+    // stackoverflow.com/questions/
+    // 1026069/capitalize-the-first-letter-of-string-in-javascript	
+    this.asCapitalizer = function(ignore_list){
+	var arrIgnore = [].concat(ignore_list)
+	
+	var capStr = function (string){
+	    // check if we need to ignore the given string
+	    for(var i=0; i<arrIgnore.length; i++){
+		if(string == arrIgnore[i]){return string}
+	    }
+	    return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
+	this.capStr = capStr
+    };
+
+    this.asInvalidMinSearch = function(min){
+	var min_limit = min
+	this.invalid_search = function(term){
+	    return term.length<min_limit
+	}
+    }
+
+
+    this.asPollerSelection = function(selector){
+	// provide method poll the selected options
+	var sel_id = selector
+	this.in_selection=function(optnid){
+	    var bln_in_selection = false;
+	    // verify that the item with optnid 
+	    //is not already selected
+	    selection = $(sel_id).select2("data");
+	    if(null != selection){
+		for (var i=0; i<selection.length; i++){
+		    if (selection[i].id == id){
+			bln_in_selection = true;
+		    }
+		}
+	    }
+	    return bln_in_selection;
+	}
+    }
+
+    this.asLinearSearch = function(){
+	this.search = function(term, choices){
+	    var arr_matches = [];
+	    var arr_selected = [];
+	    var c;
+	    for(var i=0; i<choices.length; i++){
+		c = choices[i];
+		
+		if(this.matcher(term, c.id)){
+		    if(this.in_selection(c.id)){
+			arr_selected.unshift(c.id);
+		    }else{
+			arr_matches.unshift(c);
+		    }
+		}
+	    }
+	    return {
+		matches:arr_matches, 
+		pre_selected:arr_selected
+	    };
+	    
+	}
+    }
+
+
+    this.asSingleAddableChoices = function(){
+	// The available options can be
+	// added to a single time by
+	// a load operation
+	
+    }
+
+    this.asConsistentChoices = function(const_options){
+	// The available options are not context sensative
+	// and don't change in the life of this control
+	var optns = const_options
+
+	this.choices = function(term){
+	    var subset = []
+	    if(term == ""){
+		subset = optns
+	    }else if(!invalid_search(term)){
+		subset = this.search(term, optns).matches;
+	    }
+	    return subset
+	}
+    }
+
+
+    this.asQueriable = function(){
+
+	this.options = function(query){
+	    var term = query.term;
+            var more = false;
+            var context = null;
+	    var choices = this.choices(term)
+	    
+	    var data = {results: choices, more: false, context: null};
+	    query.callback(data);
+	}
+    }
+
+
+    this.asNoMatchStaticMessenger = function(msg_obj){
+	var msg = msg_obj
+
+	sel2mix.asCapitalizer.call(this, [])
+
+	this.no_match_msg = function(){ 
+	    if(this.invalid_search(term))
+		return this.capStr(msg.search_requirements);
+	
+	    // determine if the term matches existing selection
+	    var search_res = this.linear_search(term, $(selector).select2("data"));
+	    var is_pre_selected = (search_res.pre_selected.length >0 );
+	    
+	    var base_msg = 	
+		this.capStr((is_pre_selected)?
+			    msg.search_already_selected:
+			    msg.search_no_found );
+	    
+	    base_msg += ". ";
+	    var text = base_msg;
+
+	    return text;
+	} // this.str
+	
+    }
+
+    this.asNoMatchLoadableMessenger = function(){
+
+    }
+
+    this.parsed_conf = function(opt){
+	var id = opt.id
+	return {
+	    id: id,
+	    allow_multiple: opt.multiple,
+	    selector: '#'+id,
+	    disp_compact: opt.compact
+	}
+    }
+
+
+    this.obj_merge = function(arr_objects){
+	var obj = {}
+	for(var i=0; i<arr_objects.length; i++){
+	    jQuery.extend(true, obj, arr_objects[i])
+	}
+	return obj
+    }
+
+    this.Placeholder = function(msg_source, options){
+	var msg = msg_source
+	var is_compact = options.disp_compact
+	this.str = function(){
+	    return (is_compact) ?
+		msg.select_placeholder_compact:
+		msg.select_placeholder;
+	}
+    }
+
+
+    this.options_list = function(list, objT){
+	this.list = list
+
+	// Sorting in descending order
+	// http://www.javascriptkit.com/javatutors/arraysort.shtml
+	var list_desc = list.sort(function (a,b){return b-a});
+
+	var opt = [];
+	for(var i=0; i<list_desc.length; i++){
+	    var s_i = new objT(list_desc[i]);
+	    opt.push({id:list_desc[i].toString(), text:capStr(s_i.name())});
+	}
+	return opt;
+    }
+
+
+    this.asRecordLookup = function(record){
+
+	// Attributes that have 1 record are returned as String
+	this.lookup = function(key){
+	    return this.record()[key];
+	}
+	// Attributes that have 0 or more records are returned as Arrays
+	this.lookup_arr = function(key){
+	    obj = this.lookup(key);
+	    var arr = [];
+	    if(null == obj){
+		// null
+		arr.push(arr_msg.not_applicable);
+	    }else if(obj.hasOwnProperty('length')){
+		// String
+		arr.push(obj);
+	    }else{
+		// List
+		jQuery.each(obj, function(key, str){
+			arr.push(str);
+		    });
+	    }
+	    return arr;
+	}
+
+	
+    } //     this.asRecordLookup = 
+
+    
+    // Formatting for selected options
+    this.SelectedFormatter = function(formatters, config){
+	var multi = formatters.multiple
+	var single = formatters.single
+	var compact = (formatters.compact == null)? formatters.multi : formatters.compact;
+	var conf = config
+
+	this.format = function(opt, container){
+	    if(!opt.id){
+		return "";
+	    }else if(opt.id!="header") {
+		var str = (conf.allow_multiple) ? multi(opt, container) : single(opt, container); 
+		return str;
+	    }else{
+		return "";
+	    }
+	}
+    } //    function format_selected4context
+
+    
+
+
+}).apply(sel2mix); // apply to the sel2 namespace
+
+
+(function (){
+    sel2mix.asCapitalizer.call(this)
+    
+    this.select_init = function (builder, args){
+	var selector = args.selector
+	jQuery.each(jQuery(selector), function(index){
 	    // get the id
 	    var id = this.id
-	    var input = jQuery('#'+id);
-
+	    var input = jQuery('#'+id)
+	    
 	    // get options
-	    var mul = input.hasClass('multiple');
-	    var comp = input.hasClass('compact');
-
+	    var mul = input.hasClass('multiple')
+	    var comp = input.hasClass('compact')
+	    
 	    var sel = new builder({id:this.id, multiple:mul, compact:comp})
-	    sel.build();
-	});
-}
+	    sel.build()
+	})
+	    }
+}).apply(sel2); // apply to the sel2 namespace
+
+
+this.select_init = sel2.select_init
