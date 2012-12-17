@@ -31,7 +31,7 @@
 	// Formatting for search results
 	var format_search_results = function(optn){
 	    c = new Color(optn.id)
-	    return "<span class='color_optn', style='background:#" + c.rgb +"'>[-]</span>"+ 
+	    return "<span class='colorSquare', style='background:#" + c.rgb +"'></span>"+ 
 		sel2.capStr(c.name())+" ";
 	}
 
@@ -53,10 +53,10 @@
 	}
 	var selected_formatter = new  sel2mix.SelectedFormatter(sel_formatters, configs)
 
-	this.matcher = function(term, key){
+	var matcher = function(term, key){
 	    var strKey = ""+key;
 	    var c = new Color(key)
-	    var match_beginning = (c.name().indexOf(term)==0);
+	    var match_anywhere = (c.name().indexOf(term)>=0);
 
 	    var alt = c.alt();
 	    var match_alt = false;
@@ -68,7 +68,7 @@
 		    break;
 		}
 	    }
-	    return match_beginning || match_alt;
+	    return match_anywhere || match_alt;
 	}
 
 	// query object that uses the configuration
@@ -78,8 +78,8 @@
 	sel2mix.asNoMatchStaticMessenger.call(query, msg)
 	sel2mix.asPollerSelection.call(query, configs.selector)
 	sel2mix.asInvalidMinSearch.call(query, 2)
-	sel2mix.asLinearSearch.call(query)
 	sel2mix.asConsistentChoices.call(query, color_optns)
+	sel2mix.asLinearSearch.call(query, matcher)
 	sel2mix.asQueriable.call(query)
 
 	// Conditionally mix in the initializer based on if

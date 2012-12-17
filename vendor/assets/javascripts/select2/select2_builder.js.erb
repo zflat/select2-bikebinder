@@ -50,7 +50,7 @@ var sel2 = {}, sel2mix = {};
 
     this.asLinearSearch = function(search_matcher){
 	var matcher = search_matcher
-	q =  this
+	q = this
 	this.search = function(term, choices){
 	    var arr_matches = [];
 	    var arr_selected = [];
@@ -86,13 +86,15 @@ var sel2 = {}, sel2mix = {};
 	// The available options are not context sensative
 	// and don't change in the life of this control
 	var optns = const_options
+	var q = this
+	console.log(q)
 
 	this.choices = function(term){
 	    var subset = []
 	    if(term == ""){
 		subset = optns
-	    }else if(!this.invalid_search(term)){
-		subset = this.search(term, optns).matches;
+	    }else if(!q.invalid_search(term)){
+		subset = q.search(term, optns).matches;
 	    }
 	    return subset
 	}
