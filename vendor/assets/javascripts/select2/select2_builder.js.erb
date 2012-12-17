@@ -28,7 +28,42 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
+    this.asAnywhereMatcher = function(arr_attribs, objT){
+	var attribs = arr_attribs
+	var DataObj = objT
+	
+	var is_hit = function(data, search_term){
+	    return (data.indexOf(search_term) >= 0)
+	}
 
+	var has_match = function(data, search_term){
+	    // expect data to be string or array
+	    is_arr = (typeof data) != 'string'
+	    
+	    if (is_arr){
+		for(var i=0; i<data.length; i++){
+		    if( is_hit(data[i], search_term)){
+			return true;
+		    }
+		}
+	    }else{
+		return is_hit(data, search_term);
+	    }
+	}
+	
+	this.matcher = function(term, key){
+	    var strKey = ""+key;
+	    var obj = new DataObj(key)
+	    
+	    for (var i=0; i<attribs.length; i++){
+		if(has_match(obj[attribs[i]](), term)){
+		    return true
+		}
+	    }
+	    return false;
+	}
+    }
+    
     this.asPollerSelection = function(selector){
 	// provide method poll the selected options
 	var sel_id = selector
@@ -48,9 +83,10 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
-    this.asLinearSearch = function(search_matcher){
-	var matcher = search_matcher
+    this.asLinearSearch = function(){
 	q = this
+	var matcher = q.matcher
+
 	this.search = function(term, choices){
 	    var arr_matches = [];
 	    var arr_selected = [];
@@ -87,7 +123,6 @@ var sel2 = {}, sel2mix = {};
 	// and don't change in the life of this control
 	var optns = const_options
 	var q = this
-	console.log(q)
 
 	this.choices = function(term){
 	    var subset = []
