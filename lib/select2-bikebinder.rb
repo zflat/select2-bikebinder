@@ -1,5 +1,6 @@
+require 'select2-bikebinder/version'
+
 module Select2BikeBinder
-  VERSION = '0.1.0' unless defined?(VERSION)
 
   def Select2BikeBinder::init
     I18n.load_path << Dir[File.join(File.expand_path(File.dirname(__FILE__) + '/../locales'), '*.yml')]
