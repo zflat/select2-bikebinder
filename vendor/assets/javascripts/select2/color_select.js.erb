@@ -1,6 +1,6 @@
 (function(){
     var ColorSelectBuilder = function(conf){
-	var color_optns = <%= ColorNameI18n::keys.to_json.html_safe  %>;
+	var color_keys = <%= ColorNameI18n::keys.to_json.html_safe  %>;
 
 	if(!I18n || !I18n.translate){
 	    throw(new Error("I18n not supported"))
@@ -8,7 +8,6 @@
 
 	var configs = sel2mix.parsed_conf(conf)
 
-	// lets mix!
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('colorselui.messages'),
 	     I18n.translate('sel2ui.messages')])
@@ -17,28 +16,28 @@
 
 	var Color = function Color(rgb){
 	    this.rgb = rgb;
-	    this.record = function(){
+	    var record = function(){
 		return I18n.translate('color_keys.'+rgb);
 	    }
 	    
-	    sel2mix.asRecordLookup.call(this, this.record)
+	    sel2mix.asRecordLookup.call(this, record)
 	    
-	    this.name = function(){return this.lookup('name')};
-	    this.alt = function(){return this.lookup('alt')};
+	    this.name = function(){return lookup('name')};
+	    this.alt = function(){return lookup('alt')};
 	}
 
+	var color_optns = new sel2mix.Options4Sel2(color_keys, Color)
 
 	// Formatting for search results
 	var format_search_results = function(optn){
-	    c = new Color(optn.id);
+	    c = new Color(optn.id)
 	    return "<span class='color_optn', style='background:#" + c.rgb +"'>[-]</span>"+ 
-		sel2.capStr(c.name());
+		sel2.capStr(c.name())+" ";
 	}
 
 	var sel_formatters = {
 	    multiple:
 	    function format_compact_text(optn, container){
-		
 		// Compact formatting for selection
 		var c = new Color(optn.id);
 		return sel2.capStr(c.name());
@@ -54,39 +53,44 @@
 	}
 	var selected_formatter = new  sel2mix.SelectedFormatter(sel_formatters, configs)
 
+	this.matcher = function(term, key){
+	    var strKey = ""+key;
+	    var c = new Color(key)
+	    var match_beginning = (c.name().indexOf(term)==0);
 
-
-	var query = function(){
-	    var sel_id = config.selector
-
-	    this.matcher = function(term, key){
-		var strKey = ""+key;
-		var match_beginning = (strKey.indexOf(term)==0);
-		
-		var alt = (new Color(key)).alt();
-		var match_alt = false;
-
-		for(var i=0; i<alt.length; i++){
-		    val = alt[i];
-		    if((val.indexOf(term) >=0)){
-			match_trad = true;
-			break;
-		    }
-		}
-		return match_beginning || match_alt;
-	    }
+	    var alt = c.alt();
+	    var match_alt = false;
 	    
-	    sel2mix.asNoMatchStaticMessenger(this, msg)
-	    sel2mix.asPollerSelection.call(this, sel_id)
-	    sel2mix.asInvalidMinSearch.call(this, 2)
-	    sel2mix.asLinearSearch.call(this)
-	    sel2mix.asConsistentChoices.call(this, color_optns)
-	    sel2mix.asQueriable.call(this)
+	    for(var i=0; i<alt.length; i++){
+		val = alt[i];
+		if((val.indexOf(term) >=0)){
+		    match_trad = true;
+		    break;
+		}
+	    }
+	    return match_beginning || match_alt;
 	}
-	
+
+	// query object that uses the configuration
+	// and has behaviour as created by mixins
+	var query = jQuery.extend(true, {}, configs)
+	// lets mix!
+	sel2mix.asNoMatchStaticMessenger.call(query, msg)
+	sel2mix.asPollerSelection.call(query, configs.selector)
+	sel2mix.asInvalidMinSearch.call(query, 2)
+	sel2mix.asLinearSearch.call(query)
+	sel2mix.asConsistentChoices.call(query, color_optns)
+	sel2mix.asQueriable.call(query)
+
+	// Conditionally mix in the initializer based on if
+	// the configs specify the multiple select option
+	var initializer = 
+	    (configs.allow_multiple)?
+	    new sel2mix.MultiplesInitializer():
+    	    new sel2mix.NonMultiplesInitializer()
 
 	this.build = function(){
-	    $(configs.selector).select2({
+	    var base_configs = {
 		dropdownCss: {"background":"ccf", 
 			      "border":"1px solid #999", 
 			      "padding-top":"3px"},
@@ -95,13 +99,22 @@
 		formatSelection: selected_formatter.format,
 		formatNoMatches: query.no_match_msg,
 		dropdownCssClass: "color_select",
-		//data: color_optns,
-		//query: query.options,
 		placeholder: sel2.capStr(placeholder.str()),
-		//multiple: allow_multiple,
-		//initSelection: init_selection
-	    });
-	} // function = build
+	    }
+
+	    var multi_select_configs = {
+		data: color_optns,
+		query: query.options,
+		multiple: configs.allow_multiple,
+		initSelection: initializer.init_selection
+	    }
+	    
+	    var params = (configs.allow_multiple) ?
+		jQuery.extend(true,{}, base_configs, multi_select_configs)
+	    : base_configs
+
+	    $(configs.selector).select2(params);
+	} // this.build = function
 
     }
     
@@ -114,42 +127,12 @@
 }).apply(sel2); // apply to the sel2 namespace
 
 
-function ColorSelectBuilder(args){
+{
 
-    function options(list, objT){
-	this.list = list
-
-	// Sorting in descending order
-	// http://www.javascriptkit.com/javatutors/arraysort.shtml
-	var list_desc = list.sort(function (a,b){return b-a});
-
-	var opt = [];
-	for(var i=0; i<list_desc.length; i++){
-	    var s_i = new objT(list_desc[i]);
-	    opt.push({id:list_desc[i].toString(), text:sel2.capStr(s_i.name())});
-	}
-	return opt;
-    }
-
-
+    // more methods that should be implemented in the sel2mix namespace?
 
     function clear_selection(){
 	$(selector).select2("data","");
-    }
-
-
-    function init_selection(element, callback){
-	if(allow_multiple){
-	    var data = [];
-	    $(element.val().split(",")).each(function () {
-		    var str = jQuery.trim(this);
-		    data.push({id: str, text: str});
-		});
-	    callback(data);
-	}else{
-	    str = element.val();
-	    callback({id:str, text:str});	    
-	}
     }
 
 

@@ -1,42 +1,9 @@
-// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
-if (!Array.prototype.indexOf) {
-    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-        "use strict";
-        if (this == null) {
-            throw new TypeError();
-        }
-        var t = Object(this);
-        var len = t.length >>> 0;
-        if (len === 0) {
-            return -1;
-        }
-        var n = 0;
-        if (arguments.length > 1) {
-            n = Number(arguments[1]);
-            if (n != n) { // shortcut for verifying if it's NaN
-                n = 0;
-            } else if (n != 0 && n != Infinity && n != -Infinity) {
-                n = (n > 0 || -1) * Math.floor(Math.abs(n));
-            }
-        }
-        if (n >= len) {
-            return -1;
-        }
-        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
-        for (; k < len; k++) {
-            if (k in t && t[k] === searchElement) {
-                return k;
-            }
-        }
-        return -1;
-    }
-}
-
-
 // define namespaces sel2 and sel2mod
 var sel2 = {}, sel2mix = {};
 
-(function (){
+
+(function (){ //sel2mix namespace
+
 
     // stackoverflow.com/questions/
     // 1026069/capitalize-the-first-letter-of-string-in-javascript	
@@ -81,7 +48,9 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
-    this.asLinearSearch = function(){
+    this.asLinearSearch = function(search_matcher){
+	var matcher = search_matcher
+	q =  this
 	this.search = function(term, choices){
 	    var arr_matches = [];
 	    var arr_selected = [];
@@ -89,8 +58,8 @@ var sel2 = {}, sel2mix = {};
 	    for(var i=0; i<choices.length; i++){
 		c = choices[i];
 		
-		if(this.matcher(term, c.id)){
-		    if(this.in_selection(c.id)){
+		if(matcher(term, c.id)){
+		    if(q.in_selection(c.id)){
 			arr_selected.unshift(c.id);
 		    }else{
 			arr_matches.unshift(c);
@@ -122,43 +91,77 @@ var sel2 = {}, sel2mix = {};
 	    var subset = []
 	    if(term == ""){
 		subset = optns
-	    }else if(!invalid_search(term)){
+	    }else if(!this.invalid_search(term)){
 		subset = this.search(term, optns).matches;
 	    }
 	    return subset
 	}
     }
 
+    this.MultiplesInitializer = function(){
+	this.init_selection = function(element, callback){
+	    var data = [];
+	    $(element.val().split(",")).each(function () {
+		var str = jQuery.trim(this);
+		data.push({id: str, text: str});
+	    });
+	    callback(data);
+	}
+    }
+
+    this.NonMultiplesInitializer = function(){
+	this.init_selection = function(element, callback){
+	    str = element.val();
+	    callback({id:str, text:str});	    
+	}
+    }
+
+
+    /*
+      Construct an array of options to use for a selec2 object.
+      @params list array of keys to construct objT objects
+      @params objT Constructor function for the option type (Color, Size, etc..)
+     */
+    this.Options4Sel2 = function(list, objT){
+	var opt = [];
+	for(var i=0; i<list.length; i++){
+	    var s_i = new objT(list[i]);
+	    opt.push({id:list[i].toString(), text:sel2.capStr(s_i.name())});
+	}
+	return opt;
+    }
+
 
     this.asQueriable = function(){
+	var q = this
 
 	this.options = function(query){
 	    var term = query.term;
             var more = false;
             var context = null;
-	    var choices = this.choices(term)
+	    var choices = q.choices(term)
 	    
 	    var data = {results: choices, more: false, context: null};
 	    query.callback(data);
 	}
     }
 
-
     this.asNoMatchStaticMessenger = function(msg_obj){
 	var msg = msg_obj
+	var q = this
 
 	sel2mix.asCapitalizer.call(this, [])
 
-	this.no_match_msg = function(){ 
-	    if(this.invalid_search(term))
-		return this.capStr(msg.search_requirements);
+	this.no_match_msg = function(term){ 
+	    if(q.invalid_search(term))
+		return q.capStr(msg.search_requirements);
 	
 	    // determine if the term matches existing selection
-	    var search_res = this.linear_search(term, $(selector).select2("data"));
+	    var search_res = q.search(term, $(q.selector).select2("data"));
 	    var is_pre_selected = (search_res.pre_selected.length >0 );
 	    
 	    var base_msg = 	
-		this.capStr((is_pre_selected)?
+		q.capStr((is_pre_selected)?
 			    msg.search_already_selected:
 			    msg.search_no_found );
 	    
@@ -166,7 +169,7 @@ var sel2 = {}, sel2mix = {};
 	    var text = base_msg;
 
 	    return text;
-	} // this.str
+	} // this.no_match_msg
 	
     }
 
@@ -219,15 +222,17 @@ var sel2 = {}, sel2mix = {};
 	return opt;
     }
 
-
-    this.asRecordLookup = function(record){
-
+    this.asRecordLookup = function(dynamic_record){
+	// assume record data can change, so expect
+	// a function to be supplied, which will provide
+	// valid record data
+	var record = dynamic_record
 	// Attributes that have 1 record are returned as String
-	this.lookup = function(key){
-	    return this.record()[key];
+	lookup = function(key){
+	    return record()[key] || "";
 	}
 	// Attributes that have 0 or more records are returned as Arrays
-	this.lookup_arr = function(key){
+	lookup_arr = function(key){
 	    obj = this.lookup(key);
 	    var arr = [];
 	    if(null == obj){
@@ -237,9 +242,9 @@ var sel2 = {}, sel2mix = {};
 		// String
 		arr.push(obj);
 	    }else{
-		// List
+		// List Object
 		jQuery.each(obj, function(key, str){
-			arr.push(str);
+			arr.push(str || "");
 		    });
 	    }
 	    return arr;
@@ -274,7 +279,7 @@ var sel2 = {}, sel2mix = {};
 }).apply(sel2mix); // apply to the sel2 namespace
 
 
-(function (){
+(function (){ // sel2 namespace
     sel2mix.asCapitalizer.call(this)
     
     this.select_init = function (builder, args){
@@ -296,3 +301,43 @@ var sel2 = {}, sel2mix = {};
 
 
 this.select_init = sel2.select_init
+
+
+
+
+
+
+
+// https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Array/indexOf
+if (!Array.prototype.indexOf) {
+    Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
+        "use strict";
+        if (this == null) {
+            throw new TypeError();
+        }
+        var t = Object(this);
+        var len = t.length >>> 0;
+        if (len === 0) {
+            return -1;
+        }
+        var n = 0;
+        if (arguments.length > 1) {
+            n = Number(arguments[1]);
+            if (n != n) { // shortcut for verifying if it's NaN
+                n = 0;
+            } else if (n != 0 && n != Infinity && n != -Infinity) {
+                n = (n > 0 || -1) * Math.floor(Math.abs(n));
+            }
+        }
+        if (n >= len) {
+            return -1;
+        }
+        var k = n >= 0 ? n : Math.max(len - Math.abs(n), 0);
+        for (; k < len; k++) {
+            if (k in t && t[k] === searchElement) {
+                return k;
+            }
+        }
+        return -1;
+    }
+}
