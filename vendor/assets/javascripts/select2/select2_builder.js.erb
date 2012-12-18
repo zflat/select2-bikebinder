@@ -3,7 +3,7 @@ var sel2 = {}, sel2mix = {};
 
 
 (function (){ //sel2mix namespace
-
+    "use strict"
 
     // stackoverflow.com/questions/
     // 1026069/capitalize-the-first-letter-of-string-in-javascript	
@@ -38,7 +38,7 @@ var sel2 = {}, sel2mix = {};
 
 	var has_match = function(data, search_term){
 	    // expect data to be string or array
-	    is_arr = (typeof data) != 'string'
+	    var is_arr = (typeof data) != 'string'
 	    
 	    if (is_arr){
 		for(var i=0; i<data.length; i++){
@@ -71,10 +71,10 @@ var sel2 = {}, sel2mix = {};
 	    var bln_in_selection = false;
 	    // verify that the item with optnid 
 	    //is not already selected
-	    selection = $(sel_id).select2("data");
+	    var selection = $(sel_id).select2("data");
 	    if(null != selection){
 		for (var i=0; i<selection.length; i++){
-		    if (selection[i].id == id){
+		    if (selection[i].id == optnid){
 			bln_in_selection = true;
 		    }
 		}
@@ -84,7 +84,7 @@ var sel2 = {}, sel2mix = {};
     }
 
     this.asLinearSearch = function(){
-	q = this
+	var q = this
 	var matcher = q.matcher
 
 	this.search = function(term, choices){
@@ -95,6 +95,7 @@ var sel2 = {}, sel2mix = {};
 		c = choices[i];
 		
 		if(matcher(term, c.id)){
+		    console.log(c.id)
 		    if(q.in_selection(c.id)){
 			arr_selected.unshift(c.id);
 		    }else{
@@ -265,12 +266,12 @@ var sel2 = {}, sel2mix = {};
 	// valid record data
 	var record = dynamic_record
 	// Attributes that have 1 record are returned as String
-	lookup = function(key){
+	this.lookup = function(key){
 	    return record()[key] || "";
 	}
 	// Attributes that have 0 or more records are returned as Arrays
-	lookup_arr = function(key){
-	    obj = this.lookup(key);
+	this.lookup_arr = function(key){
+	    obj = lookup(key);
 	    var arr = [];
 	    if(null == obj){
 		// null
@@ -317,6 +318,8 @@ var sel2 = {}, sel2mix = {};
 
 
 (function (){ // sel2 namespace
+    "use strict"
+
     sel2mix.asCapitalizer.call(this)
     
     this.select_init = function (builder, args){

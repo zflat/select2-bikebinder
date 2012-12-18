@@ -22,8 +22,8 @@
 	    
 	    sel2mix.asRecordLookup.call(this, record)
 	    
-	    this.name = function(){return lookup('name')};
-	    this.alt = function(){return lookup('alt')};
+	    this.name = function(){return this.lookup('name')};
+	    this.alt = function(){return this.lookup('alt')};
 	}
 
 	var color_optns = new sel2mix.Options4Sel2(color_keys, Color)
