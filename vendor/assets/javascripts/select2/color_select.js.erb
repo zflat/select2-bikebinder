@@ -2,16 +2,12 @@
     var ColorSelectBuilder = function(conf){
 	var color_keys = <%= ColorNameI18n::keys.to_json.html_safe  %>;
 
-	if(!I18n || !I18n.translate){
-	    throw(new Error("I18n not supported"))
-	}
-
 	var configs = sel2mix.parsed_conf(conf)
 
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('colorselui.messages'),
 	     I18n.translate('sel2ui.messages')])
-	sel2mix.asCapitalizer.call(this, [])	
+	sel2mix.asCapitalizer.call(this, msg.not_applicable)	
 	var placeholder = new sel2mix.Placeholder(msg, configs)
 
 	var Color = function Color(rgb){
@@ -87,7 +83,7 @@
 	    $(configs.selector).select2(params);
 	} // this.build = function
 
-    }
+    } // ColorSelectBuilder
     
 
     // Public access to the buildier
@@ -104,27 +100,6 @@
 
     function clear_selection(){
 	$(selector).select2("data","");
-    }
-
-
-
-    function list_vals(arr){
-	strText = "";
-	if(arr.length < 1){
-	    strText = arr_msg.not_applicable;
-	}else if(arr.length == 1){
-	    strText = capStr(arr[0]);
-	}else{
-	    strText = "<ul class=\"attrib\">";
-	    for(var i=0; i<arr.length; i++){
-		strText +="<li>";
-		strText +=capStr(arr[i]);
-		strText +="</li>";
-	    }
-	    strText +="</ul>";
-	}
-
-	return strText;
     }
 
 } 

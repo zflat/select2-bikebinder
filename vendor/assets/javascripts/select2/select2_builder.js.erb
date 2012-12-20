@@ -28,6 +28,55 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
+    this.asWordPrefixMatcher = function(arr_attribs, objT){
+	var attribs = arr_attrivs
+	var DataObj = objT
+
+	var prefix_match =function(word, term){
+	    return (word.indexOf(term)==0)
+	}
+
+	var is_hit = function(data, search_term){
+	    var term = search_term.toLowerCase()
+	    $jQuery(data.split(" ")).each(function () {
+		var word = jQuery.trim(this).toLowerCase();
+		if(prefix_match(word, term)){
+		    return true
+		}
+	    });    
+	    return false
+	}
+
+	var has_match = function(data, search_term){
+	    // expect data to be string or array
+	    var is_arr = (typeof data) != 'string'
+	    
+	    if (is_arr){
+		for(var i=0; i<data.length; i++){
+		    if( is_hit(data[i], search_term)){
+			return true;
+		    }
+		}
+	    }else{
+		return is_hit(data, search_term);
+	    }
+	}
+	
+	this.matcher = function(term, key){
+	    var strKey = ""+key;
+	    var obj = new DataObj(key)
+	    
+	    for (var i=0; i<attribs.length; i++){
+		if(has_match(obj[attribs[i]](), term)){
+		    return true
+		}
+	    }
+	    return false;
+	}
+    } // asWordPrefixMatcher
+	
+
+
     this.asAnywhereMatcher = function(arr_attribs, objT){
 	var attribs = arr_attribs
 	var DataObj = objT
@@ -112,11 +161,38 @@ var sel2 = {}, sel2mix = {};
     }
 
 
-    this.asSingleAddableChoices = function(){
+    this.asLoadableChoices = function(optns_unloaded, optns_loaded){
 	// The available options can be
 	// added to a single time by
 	// a load operation
-	
+
+	var optns0 = optns_unloaded
+	var optns1 = optns_loaded
+	var q = this
+	var optns_loaded = false
+
+	this.load_additional_choices = function(){
+	    loaded = true
+	}
+
+	this.unload_additional_choices = function(){
+	    loaded = false
+	}
+
+	this.loaded_full = function(){return loaded}
+
+	this.choices = function(term){
+	    if(term == ""){
+		choices = (loaded)? optns1: optns0;
+		choices = append_header(choices);
+	    }else if(invalid_search(term)){
+		choices = [];
+	    }else{
+		choices = linear_search(term, optns1);
+		choices = choices.matches;
+	    }
+	    
+	}
     }
 
     this.asConsistentChoices = function(const_options){
@@ -139,7 +215,7 @@ var sel2 = {}, sel2mix = {};
     this.MultiplesInitializer = function(){
 	this.init_selection = function(element, callback){
 	    var data = [];
-	    $(element.val().split(",")).each(function () {
+	    jQuery(element.val().split(",")).each(function () {
 		var str = jQuery.trim(this);
 		data.push({id: str, text: str});
 	    });
@@ -184,6 +260,34 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
+    this.asNoMatchLoadableMessenger = function(msg_obj, load_link){
+	var msg = msg_obj
+	var q = this
+	var link = load_link
+
+	sel2mix.asCapitalizer.call(this, [])
+
+	this.no_match_msg = function(term){ 
+	    if(q.invalid_search(term))
+		return q.capStr(msg.search_requirements);
+	
+	    // determine if the term matches existing selection
+	    var search_res = q.search(term, $(q.selector).select2("data"));
+	    var is_pre_selected = (search_res.pre_selected.length >0 );
+	    
+	    var base_msg = 	
+		q.capStr((is_pre_selected)?
+			    msg.search_already_selected:
+			    msg.search_no_found );
+	    
+	    base_msg += ". ";
+	    var text = (q.optns_loaded)? base_msg: base_msg + link
+
+	    return text;
+	} // this.no_match_msg
+
+    }
+
     this.asNoMatchStaticMessenger = function(msg_obj){
 	var msg = msg_obj
 	var q = this
@@ -209,11 +313,15 @@ var sel2 = {}, sel2mix = {};
 	    return text;
 	} // this.no_match_msg
 	
+    } // asNoMatchStaticMessenger
+
+    this.asClearable(selector){
+	var sel_id = selector
+	this.clear_selection = function(){
+	    jQuery(selector).select2("data","");
+	}
     }
 
-    this.asNoMatchLoadableMessenger = function(){
-
-    }
 
     this.parsed_conf = function(opt){
 	var id = opt.id
@@ -296,6 +404,7 @@ var sel2 = {}, sel2mix = {};
     this.SelectedFormatter = function(formatters, config){
 	var multi = formatters.multiple
 	var single = formatters.single
+	// compact defaults to multi if none is given
 	var compact = (formatters.compact == null)? formatters.multi : formatters.compact;
 	var conf = config
 
@@ -310,8 +419,24 @@ var sel2 = {}, sel2mix = {};
 	    }
 	}
     } //    function format_selected4context
-
     
+    function this.vals_toListStr(arr, msg){
+	var strText = "";
+	if(arr.length < 1){
+	    strText = msg.not_applicable;
+	}else if(arr.length == 1){
+	    strText = sel2mix.capStr(arr[0]);
+	}else{
+	    strText = "<ul class=\"attrib\">";
+	    for(var i=0; i<arr.length; i++){
+		strText +="<li>";
+		strText += sel2mix.capStr(arr[i]);
+		strText +="</li>";
+	    }
+	    strText +="</ul>";
+	}
+	    return strText;
+    }
 
 
 }).apply(sel2mix); // apply to the sel2 namespace
@@ -323,6 +448,10 @@ var sel2 = {}, sel2mix = {};
     sel2mix.asCapitalizer.call(this)
     
     this.select_init = function (builder, args){
+	if(!I18n || !I18n.translate){
+	    throw(new Error("I18n not supported"))
+	}
+
 	var selector = args.selector
 	jQuery.each(jQuery(selector), function(index){
 	    // get the id
