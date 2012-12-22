@@ -1,9 +1,8 @@
 (function(){
     var WheelSelectBuilder = function(conf){
 
-
 	var configs = sel2mix.parsed_conf(conf)
-	var loaded_full = false
+//	var loaded_full = false
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('wheelui.messages'),
 	     I18n.translate('isobsd.messages')])
@@ -27,6 +26,7 @@
 	    this.diameter = function(){return bsd+"mm"}
 	    this.app = function(){return this.lookup_arr('app')}
 	    this.trad = function(){return this.lookup_arr('trad')}
+	    this.name = function(){return this.bsd}
 	    this.rarity_key = function(){
 	    }
 
@@ -49,7 +49,8 @@
 	    }
 	    // Sorting in descending order
 	    // http://www.javascriptkit.com/javatutors/arraysort.shtml
-	    var list_desc = list.sort(function (a,b){return b-a});
+	    var list_desc = list.sort(function (a,b){return b-a})
+	    return list_desc
 	}
 
 	function size_optns(rarity){
@@ -62,20 +63,20 @@
 
 
 	// format for search results
-	var format_search_results = function(size){
+	var format_results_table = function(size){
 	    if(size.id=="header") {
 		return "<table class=\"wheel_opt\"><tr><th class=\"iso\">"
-		    +capStr(msg.header.iso)+"</th><th class=\"trad\">"
-		    +capStr(msg.header.trad)+"</th><th class=\"app\">"
-		    +capStr(msg.header.app)+"</th><th class=\"rarity\">"
-		    +capStr(msg.header.rarity)+"</th></tr></table>";
+		    +sel2.capStr(msg.header.iso)+"</th><th class=\"trad\">"
+		    +sel2.capStr(msg.header.trad)+"</th><th class=\"app\">"
+		    +sel2.capStr(msg.header.app)+"</th><th class=\"rarity\">"
+		    +sel2.capStr(msg.header.rarity)+"</th></tr></table>";
 	    }
 	    s = new Size(size.id);
 	    return "<table class=\"wheel_opt\"><tr><td class=\"iso\">"+
 		s.diameter()+"</td><td class=\"trad\">"+
 		sel2mix.vals_toListStr(s.trad(), msg)+"</td><td class=\"app\">"+
 		sel2mix.vals_toListStr(s.app(), msg)+"</td><td class=\"rarity\">"+
-		capStr(s.rarity())+"</td></tr></table>";
+		sel2.capStr(s.rarity())+"</td></tr></table>";
 	}
 
 	// format for selected option in non-compact mode
@@ -100,7 +101,7 @@
 	var selected_formatter = new  sel2mix.SelectedFormatter(sel_formatters, configs)
 
 	function append_header(choices){
-	    header_option = {id:'header', text:capStr(strPlaceholder())}
+	    header_option = {id:'header', text:sel2.capStr(placeholder.str())}
 	    a = choices.slice();
 	    a.unshift(header_option);
 	    return a;
@@ -108,7 +109,7 @@
 
 
 	function load_full_id(){
-	    return "no_size_match_" + id;
+	    return "no_size_match_" + configs.id;
 	}
 
 	function load_full_selector(){
@@ -117,16 +118,16 @@
 
 	function load_link_str(){
 	    return "<br /><a id=\""+
-	    load_full_id()+"\" href=\"#\">"+capStr(msg.full_list_link)+"</a>."
+	    load_full_id()+"\" href=\"#\">"+sel2.capStr(msg.full_list_link)+"</a>."
 	}
 
 
 	var query = jQuery.extend(true, {}, configs)
-	sel2mix.asWordPrefixMatcher.call(query, ['bsd', 'trad'], Size)
+	sel2mix.asWordPrefixMatcher.call(query, ['name', 'trad'], Size)
 	sel2mix.asNoMatchLoadableMessenger.call(query, msg, load_link_str())
 	sel2mix.asPollerSelection.call(query, configs.selector)
 	sel2mix.asInvalidMinSearch.call(query, 2)
-	sel2mix.asLoadableChoices.call(query, optns_partial, optns_all)
+	sel2mix.asLoadableChoices.call(query, optns_partial, optns_all, append_header)
 	sel2mix.asLinearSearch.call(query)
 	sel2mix.asQueriable.call(query)
 	
@@ -156,37 +157,21 @@
 	    }
 	}
 
-
-	
-	sel2mix.asClearable.call(this, selector)
+	sel2mix.asClearable.call(this, configs.selector)
 
 	/*
 	  Remove the header by iterating over each element
 	  and only keeping elements without header id.
 	*/
 	function remove_header_msel(){
-	    var d0 = $(selector).select2("data");
+	    var d0 = $(configs.selector).select2("data");
 	    var data = [];
 	    jQuery.each(d0, function(){
 		if(this.id !="header"){
 		    data.push(this);
 		}
 	    });
-	    $(selector).select2("data", data);
-	}
-
-	function init_selection(element, callback){
-	    if(allow_multiple){
-		var data = [];
-		$(element.val().split(",")).each(function () {
-		    var str = jQuery.trim(this);
-		    data.push({id: str, text: str});
-		});
-		callback(data);
-	    }else{
-		str = element.val();
-	    callback({id:str, text:str});	    
-	    }
+	    $(configs.selector).select2("data", data);
 	}
 
 	var initializer = 
@@ -196,33 +181,33 @@
 
 	this.build = function(){
 
-	$(selector).select2({
+	    $(configs.selector).select2({
 		dropdownCss: {"background":"ccf", 
 			      "width":"700px", 
 			      "border":"1px solid #999", 
 			      "padding-top":"3px"},
 		allowClear: true,
-		formatResult: format_complete,
-		formatSelection: format_simple,
-		formatNoMatches: noMatchesMsg,
+		formatResult: format_results_table,
+		formatSelection: selected_formatter.format,
+		formatNoMatches: query.no_match_msg,
 		dropdownCssClass: "wheel_select",
 		data: append_header(optns_partial),
-		query: q_options,
-		placeholder: capStr(strPlaceholder()),
-		multiple: allow_multiple,
-		initSelection: init_selection
+		query: query.options,
+		placeholder: sel2.capStr(placeholder.str()),
+		multiple: configs.allow_multiple,
+		initSelection: initializer.init_selection
 	    });
+	    
+	    $("*.wheel_select").on("click", load_full_selector(), load_full);
+	    $(configs.selector).on("change",conditionalClear);
 	
-	$("*.wheel_select").on("click", load_full_selector(), load_full);
-	$(selector).on("change",conditionalClear);
-	
-    }
+	}
+
+    } // var WheelSelectBuilder = fuction(args)
 
     // Public access to the buildier
-    this.ColorSelectBuilder = function(args){
-	return new ColorSelectBuilder(args)
+    this.WheelSelectBuilder = function(args){
+	return (new WheelSelectBuilder(args))
     }
-
-} 
 
 }).apply(sel2); // apply to the sel2 namespace

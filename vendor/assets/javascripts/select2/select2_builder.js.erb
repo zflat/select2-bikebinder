@@ -11,6 +11,7 @@ var sel2 = {}, sel2mix = {};
 	var arrIgnore = [].concat(ignore_list)
 	
 	var capStr = function (string){
+	    var string = string.toString()
 	    // check if we need to ignore the given string
 	    for(var i=0; i<arrIgnore.length; i++){
 		if(string == arrIgnore[i]){return string}
@@ -29,7 +30,7 @@ var sel2 = {}, sel2mix = {};
     }
 
     this.asWordPrefixMatcher = function(arr_attribs, objT){
-	var attribs = arr_attrivs
+	var attribs = arr_attribs
 	var DataObj = objT
 
 	var prefix_match =function(word, term){
@@ -38,7 +39,7 @@ var sel2 = {}, sel2mix = {};
 
 	var is_hit = function(data, search_term){
 	    var term = search_term.toLowerCase()
-	    $jQuery(data.split(" ")).each(function () {
+	    jQuery(data.split(" ")).each(function () {
 		var word = jQuery.trim(this).toLowerCase();
 		if(prefix_match(word, term)){
 		    return true
@@ -161,7 +162,7 @@ var sel2 = {}, sel2mix = {};
     }
 
 
-    this.asLoadableChoices = function(optns_unloaded, optns_loaded){
+    this.asLoadableChoices = function(optns_unloaded, optns_loaded, header_appender){
 	// The available options can be
 	// added to a single time by
 	// a load operation
@@ -170,28 +171,30 @@ var sel2 = {}, sel2mix = {};
 	var optns1 = optns_loaded
 	var q = this
 	var optns_loaded = false
+	var append_header = header_appender
 
 	this.load_additional_choices = function(){
-	    loaded = true
+	    optns_loaded = true
 	}
 
 	this.unload_additional_choices = function(){
-	    loaded = false
+	    optns_loaded = false
 	}
 
-	this.loaded_full = function(){return loaded}
+	this.loaded_full = function(){return optns_loaded}
 
 	this.choices = function(term){
+	    var choices = []
 	    if(term == ""){
-		choices = (loaded)? optns1: optns0;
-		choices = append_header(choices);
-	    }else if(invalid_search(term)){
-		choices = [];
-	    }else{
-		choices = linear_search(term, optns1);
+		choices = (this.loaded_full())? optns1: optns0;
+		if(append_header){
+		    choices = append_header(choices);
+		}
+	    }else if(!q.invalid_search(term)){
+		choices = q.search(term, optns1);
 		choices = choices.matches;
 	    }
-	    
+	    return choices
 	}
     }
 
@@ -225,7 +228,7 @@ var sel2 = {}, sel2mix = {};
 
     this.NonMultiplesInitializer = function(){
 	this.init_selection = function(element, callback){
-	    str = element.val();
+	    var str = element.val();
 	    callback({id:str, text:str});	    
 	}
     }
@@ -315,7 +318,7 @@ var sel2 = {}, sel2mix = {};
 	
     } // asNoMatchStaticMessenger
 
-    this.asClearable(selector){
+    this.asClearable = function(selector){
 	var sel_id = selector
 	this.clear_selection = function(){
 	    jQuery(selector).select2("data","");
@@ -379,7 +382,7 @@ var sel2 = {}, sel2mix = {};
 	}
 	// Attributes that have 0 or more records are returned as Arrays
 	this.lookup_arr = function(key){
-	    obj = lookup(key);
+	    var obj = this.lookup(key);
 	    var arr = [];
 	    if(null == obj){
 		// null
@@ -420,17 +423,17 @@ var sel2 = {}, sel2mix = {};
 	}
     } //    function format_selected4context
     
-    function this.vals_toListStr(arr, msg){
+    this.vals_toListStr = function(arr, msg){
 	var strText = "";
 	if(arr.length < 1){
 	    strText = msg.not_applicable;
 	}else if(arr.length == 1){
-	    strText = sel2mix.capStr(arr[0]);
+	    strText = sel2.capStr(arr[0]);
 	}else{
 	    strText = "<ul class=\"attrib\">";
 	    for(var i=0; i<arr.length; i++){
 		strText +="<li>";
-		strText += sel2mix.capStr(arr[i]);
+		strText += sel2.capStr(arr[i]);
 		strText +="</li>";
 	    }
 	    strText +="</ul>";
