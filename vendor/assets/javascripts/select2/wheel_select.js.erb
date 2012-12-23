@@ -20,7 +20,7 @@
 	    var record = function(){
 		return I18n.translate('isobsd.sizes.'+bsd)
 	    }
-	    sel2mix.asRecordLookup.call(this, record)
+	    sel2mix.asRecordLookup.call(this, record, msg.not_applicable)
 
 	    this.diameter = function(){return bsd+"mm"}
 	    this.app = function(){return this.lookup_arr('app')}
