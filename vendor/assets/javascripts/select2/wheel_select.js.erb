@@ -2,7 +2,7 @@
     var WheelSelectBuilder = function(conf){
 
 	var configs = sel2mix.parsed_conf(conf)
-//	var loaded_full = false
+
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('wheelui.messages'),
 	     I18n.translate('isobsd.messages')])
@@ -14,7 +14,6 @@
 	}
 
 	var placeholder = new sel2mix.Placeholder(msg, configs)
-
 
 	function Size(bsd){
 	    this.bsd = bsd
@@ -60,7 +59,6 @@
     
 	var optns_partial = size_optns(['common', 'uncommon']);
 	var optns_all = size_optns(['common', 'uncommon', 'rare']);
-
 
 	// format for search results
 	var format_results_table = function(size){

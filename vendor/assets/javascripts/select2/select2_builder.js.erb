@@ -37,38 +37,37 @@ var sel2 = {}, sel2mix = {};
 	    return (word.indexOf(term)==0)
 	}
 
-	var is_hit = function(data, search_term){
+	var match_arr = function(data, search_term){
 	    var term = search_term.toLowerCase()
-	    jQuery(data.split(" ")).each(function () {
-		var word = jQuery.trim(this).toLowerCase();
+	    var arr_term = data.split(" ")
+	    for (var i=0; i<arr_term.length; i++){
+		var word = jQuery.trim(arr_term[i]).toLowerCase();
 		if(prefix_match(word, term)){
 		    return true
 		}
-	    });    
+	    }
 	    return false
 	}
 
 	var has_match = function(data, search_term){
-	    // expect data to be string or array
-	    var is_arr = (typeof data) != 'string'
-	    
-	    if (is_arr){
-		for(var i=0; i<data.length; i++){
-		    if( is_hit(data[i], search_term)){
-			return true;
-		    }
+	    // expect data to be an array
+	    for(var i=0; i<data.length; i++){
+		if( match_arr(data[i], search_term)){
+		    return true;
 		}
-	    }else{
-		return is_hit(data, search_term);
 	    }
+	    return false;
 	}
 	
 	this.matcher = function(term, key){
 	    var strKey = ""+key;
 	    var obj = new DataObj(key)
-	    
+
 	    for (var i=0; i<attribs.length; i++){
-		if(has_match(obj[attribs[i]](), term)){
+		var data = obj[attribs[i]]()
+		// force data to be an array
+		data = (typeof data == 'string') ? [data] : data
+		if(has_match(data, term)){
 		    return true
 		}
 	    }
@@ -99,6 +98,7 @@ var sel2 = {}, sel2mix = {};
 	    }else{
 		return is_hit(data, search_term);
 	    }
+	    return false;
 	}
 	
 	this.matcher = function(term, key){
@@ -117,11 +117,16 @@ var sel2 = {}, sel2mix = {};
     this.asPollerSelection = function(selector){
 	// provide method poll the selected options
 	var sel_id = selector
+
+	this.curr_selection = function(){
+	    return ($(sel_id).select2("data") || [])
+	}
+
 	this.in_selection=function(optnid){
-	    var bln_in_selection = false;
+	    var bln_in_selection = false
 	    // verify that the item with optnid 
 	    //is not already selected
-	    var selection = $(sel_id).select2("data");
+	    var selection = this.curr_selection()
 	    if(null != selection){
 		for (var i=0; i<selection.length; i++){
 		    if (selection[i].id == optnid){
@@ -145,7 +150,6 @@ var sel2 = {}, sel2mix = {};
 		c = choices[i];
 		
 		if(matcher(term, c.id)){
-		    console.log(c.id)
 		    if(q.in_selection(c.id)){
 			arr_selected.unshift(c.id);
 		    }else{
@@ -153,6 +157,7 @@ var sel2 = {}, sel2mix = {};
 		    }
 		}
 	    }
+
 	    return {
 		matches:arr_matches, 
 		pre_selected:arr_selected
@@ -167,9 +172,9 @@ var sel2 = {}, sel2mix = {};
 	// added to a single time by
 	// a load operation
 
+	var q = this
 	var optns0 = optns_unloaded
 	var optns1 = optns_loaded
-	var q = this
 	var optns_loaded = false
 	var append_header = header_appender
 
@@ -275,7 +280,7 @@ var sel2 = {}, sel2mix = {};
 		return q.capStr(msg.search_requirements);
 	
 	    // determine if the term matches existing selection
-	    var search_res = q.search(term, $(q.selector).select2("data"));
+	    var search_res = q.search(term, q.curr_selection())
 	    var is_pre_selected = (search_res.pre_selected.length >0 );
 	    
 	    var base_msg = 	
@@ -302,7 +307,8 @@ var sel2 = {}, sel2mix = {};
 		return q.capStr(msg.search_requirements);
 	
 	    // determine if the term matches existing selection
-	    var search_res = q.search(term, $(q.selector).select2("data"));
+	    var curr_sel = q.curr_selection()
+	    var search_res = q.search(term, curr_sel);
 	    var is_pre_selected = (search_res.pre_selected.length >0 );
 	    
 	    var base_msg = 	
