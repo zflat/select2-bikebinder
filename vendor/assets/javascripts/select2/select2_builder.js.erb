@@ -377,15 +377,15 @@ var sel2 = {}, sel2mix = {};
 	return opt;
     }
 
-    this.asRecordLookup = function(dynamic_record, na_message){
+    this.asRecordLookup = function(dynamic_record, missing_callback){
 	// assume record data can change, so expect
 	// a function to be supplied, which will provide
 	// valid record data
 	var record = dynamic_record
-	var not_applicable = na_message
+	var missing_fn = missing_callback
 	// Attributes that have 1 record are returned as String
 	this.lookup = function(key){
-	    return record()[key] || not_applicable;
+	    return record()[key] || missing_fn();
 	}
 	// Attributes that have 0 or more records are returned as Arrays
 	this.lookup_arr = function(key){
