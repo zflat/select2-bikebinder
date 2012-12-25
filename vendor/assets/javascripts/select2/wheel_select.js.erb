@@ -21,11 +21,11 @@
 		return I18n.translate('isobsd.sizes.'+bsd)
 	    }
 	    var missing_na = function(){return msg.not_applicable}
-	    sel2mix.asRecordLookup.call(this, record, missing_na)
+	    sel2mix.asRecordLookup.call(this, record)
 
 	    this.diameter = function(){return bsd+"mm"}
-	    this.app = function(){return this.lookup_arr('app')}
-	    this.trad = function(){return this.lookup_arr('trad')}
+	    this.app = function(){return this.lookup_arr('app', msg.not_applicable)}
+	    this.trad = function(){return this.lookup_arr('trad', msg.not_applicable)}
 	    this.name = function(){return this.bsd}
 	    this.rarity_key = function(){
 	    }
@@ -122,7 +122,7 @@
 
 
 	var query = jQuery.extend(true, {}, configs)
-	sel2mix.asWordPrefixMatcher.call(query, ['name', 'trad'], Size)
+	sel2mix.asWordPrefixMatcher.call(query,['name', 'trad'], Size)
 	sel2mix.asNoMatchLoadableMessenger.call(query, msg, load_link_str())
 	sel2mix.asPollerSelection.call(query, configs.selector)
 	sel2mix.asInvalidMinSearch.call(query, 2)

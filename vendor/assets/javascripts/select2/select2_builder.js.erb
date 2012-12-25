@@ -29,30 +29,20 @@ var sel2 = {}, sel2mix = {};
 	}
     }
 
-    this.asWordPrefixMatcher = function(arr_attribs, objT){
+    this.asOuterMatcher = function(arr_attribs, objT, inner_matcher_fn){
 	var attribs = arr_attribs
 	var DataObj = objT
+	var inner_match = inner_matcher_fn
 
-	var prefix_match =function(word, term){
-	    return (word.indexOf(term)==0)
-	}
-
-	var match_arr = function(data, search_term){
-	    var term = search_term.toLowerCase()
-	    var arr_term = data.split(" ")
-	    for (var i=0; i<arr_term.length; i++){
-		var word = jQuery.trim(arr_term[i]).toLowerCase();
-		if(prefix_match(word, term)){
-		    return true
-		}
-	    }
-	    return false
-	}
-
-	var has_match = function(data, search_term){
-	    // expect data to be an array
+	// Iterate over the attributes for a give option
+	// and apply the matching function
+	//
+	// @params data array of attributes to match against
+	// @params search term from user to check for match 
+	//
+	var outer_matcher = function(data, search_term){
 	    for(var i=0; i<data.length; i++){
-		if( match_arr(data[i], search_term)){
+		if( inner_match(data[i], search_term)){
 		    return true;
 		}
 	    }
@@ -64,54 +54,48 @@ var sel2 = {}, sel2mix = {};
 	    var obj = new DataObj(key)
 
 	    for (var i=0; i<attribs.length; i++){
-		var data = obj[attribs[i]]()
+		var data = obj[attribs[i]]("")
+
 		// force data to be an array
 		data = (typeof data == 'string') ? [data] : data
-		if(has_match(data, term)){
+		if(outer_matcher(data, term)){
 		    return true
 		}
 	    }
 	    return false;
+	}	
+    }
+
+    this.asWordPrefixMatcher = function(arr_attribs, objT){
+	var prefix_match =function(word, term){
+	    return (word.indexOf(term)==0)
 	}
+	
+	var inner_matcher_fn = function(data, search_term){
+	    var term = search_term.toLowerCase()
+	    var arr_term = data.split(" ")
+	    for (var i=0; i<arr_term.length; i++){
+		var word = jQuery.trim(arr_term[i]).toLowerCase();
+		if(prefix_match(word, term)){
+		    return true
+		}
+	    }
+	    return false
+	}
+
+	this.inner_match = inner_matcher_fn
+	sel2mix.asOuterMatcher.call(this, arr_attribs, objT, this.inner_match)	
+	
     } // asWordPrefixMatcher
 	
 
 
     this.asAnywhereMatcher = function(arr_attribs, objT){
-	var attribs = arr_attribs
-	var DataObj = objT
-	
-	var is_hit = function(data, search_term){
+	var inner_matcher_fn = function(data, search_term){
 	    return (data.indexOf(search_term) >= 0)
 	}
-
-	var has_match = function(data, search_term){
-	    // expect data to be string or array
-	    var is_arr = (typeof data) != 'string'
-	    
-	    if (is_arr){
-		for(var i=0; i<data.length; i++){
-		    if( is_hit(data[i], search_term)){
-			return true;
-		    }
-		}
-	    }else{
-		return is_hit(data, search_term);
-	    }
-	    return false;
-	}
-	
-	this.matcher = function(term, key){
-	    var strKey = ""+key;
-	    var obj = new DataObj(key)
-	    
-	    for (var i=0; i<attribs.length; i++){
-		if(has_match(obj[attribs[i]](), term)){
-		    return true
-		}
-	    }
-	    return false;
-	}
+	this.inner_match = inner_matcher_fn
+	sel2mix.asOuterMatcher.call(this, arr_attribs, objT, this.inner_match)	
     }
     
     this.asPollerSelection = function(selector){
@@ -377,30 +361,30 @@ var sel2 = {}, sel2mix = {};
 	return opt;
     }
 
-    this.asRecordLookup = function(dynamic_record, missing_callback){
+    this.asRecordLookup = function(dynamic_record){
 	// assume record data can change, so expect
 	// a function to be supplied, which will provide
 	// valid record data
 	var record = dynamic_record
-	var missing_fn = missing_callback
+
 	// Attributes that have 1 record are returned as String
-	this.lookup = function(key){
-	    return record()[key] || missing_fn();
+	this.lookup = function(key, missing_val){
+	    return record()[key] || missing_val
 	}
 	// Attributes that have 0 or more records are returned as Arrays
-	this.lookup_arr = function(key){
-	    var obj = this.lookup(key);
+	this.lookup_arr = function(key, missing_val){
+	    var obj = record()[key]  // this.lookup(key);
 	    var arr = [];
 	    if(null == obj){
 		// null
-		arr.push(not_applicable);
+		arr.push(missing_val);
 	    }else if(obj.hasOwnProperty('length')){
 		// String
 		arr.push(obj);
 	    }else{
 		// List Object
 		jQuery.each(obj, function(key, str){
-			arr.push(str || "");
+			arr.push(str || missing_val);
 		    });
 	    }
 	    return arr;

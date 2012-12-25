@@ -15,11 +15,11 @@
 	    var record = function(){
 		return I18n.translate('color_keys.'+rgb);
 	    }
-	    
+	    var missing_na = function(){return msg.not_applicable}	    
 	    sel2mix.asRecordLookup.call(this, record)
 	    
-	    this.name = function(){return this.lookup('name')};
-	    this.alt = function(){return this.lookup('alt')};
+	    this.name = function(def_val){return this.lookup('name', def_val||msg.not_applicable)};
+	    this.alt = function(def_val){return this.lookup('alt', def_val||msg.not_applicable)};
 	}
 
 	var color_optns = new sel2mix.Options4Sel2(color_keys, Color)
