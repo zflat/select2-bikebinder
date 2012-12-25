@@ -4,6 +4,7 @@ en:
       :search_requirements: please enter 2 or more characters
       :search_no_found: no matches found
       :search_already_selected: matching options already selected
+      :not_applicable: n/a
   wheelui:
     messages:
       :select_placeholder: select a wheel size

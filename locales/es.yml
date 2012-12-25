@@ -4,6 +4,7 @@ es:
       :search_requirements: por favor, la entrada 2 o más caracteres
       :search_no_found: no se han encontrado resultados
       :search_already_selected: opciones de concordancia ya seleccionada
+      :not_applicable: n/a
   wheelui:
     messages:
       :select_placeholder: seleccionar un tamaño de rueda
