@@ -58,7 +58,8 @@ Add the following to your `app/assets/javascripts/application.js`:
 Add to your `app/assets/stylesheets/application.css`:
 
 	*= require select2
-	*= require wheel_select
+	*= require select2/wheel_select
+	*= require select2/color_select
 
 ### Add the select element to your view
 
@@ -67,10 +68,13 @@ Add to your `app/assets/stylesheets/application.css`:
 	     
 	$(document).ready(
 	  function() { 
-	     select_init(WheelSelectBuilder, 
+	     select_init(sel2.WheelSelectBuilder, 
 	     {selector:"<%="*.#{Select2BikeBinder::Builder::WheelDiameterSelect.selector_class}"%>"});
+
+	     select_init(sel2.ColorSelectBuilder, 
+	     {selector:"<%="*.#{Select2BikeBinder::Builder::ColorSelect.selector_class}"%>"});
 	   }
-	);
+	);}
 	
 	</script>
 	
@@ -80,6 +84,8 @@ Add to your `app/assets/stylesheets/application.css`:
 
 	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e3b', :width=>'200px', :multiple=>true, :compact=>true) %>
 
+
+        <%=  render Select2BikeBinder::Builder::ColorSelect.new( 's5c', :multiple=>true, :compact=>false) %>
 
 # License
 
