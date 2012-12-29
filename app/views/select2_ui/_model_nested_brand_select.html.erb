@@ -1,0 +1,7 @@
+<% obj = model_nested_brand_select %>
+
+
+<%=  hidden_field_tag(
+    obj.id, obj.value, 
+    :style=>obj.css_style, :class=>obj.css_class
+    ) %>

@@ -455,8 +455,11 @@ var sel2 = {}, sel2mix = {};
 	    // get options
 	    var mul = input.hasClass('multiple')
 	    var comp = input.hasClass('compact')
+
+	    var optns = {id:this.id, multiple:mul, compact:comp}
+	    var sel_params = sel2mix.obj_merge([optns, args.optns])
 	    
-	    var sel = new builder({id:this.id, multiple:mul, compact:comp})
+	    var sel = new builder(sel_params)
 	    sel.build()
 	})
 	    }
