@@ -6,8 +6,10 @@
     obj.id, obj.value, 
     :style=>obj.css_style, :class=>obj.css_class
     ) %>
-
 <% else %>
+
+<%= select_tag(obj.id, options_for_select(obj.optns_list)) %>
+
 <select id="<%= obj.id %>" style="<%= obj.css_style %>" class="<%= obj.css_class %>">
   <option value=""></option>
   <%   ColorNameI18n::keys.each do |k|     %>
@@ -15,6 +17,7 @@
   <option value="<%= k %>"><%= n %></option>
   <% end %>
 </select>
+
 
 
 <% end # if obj.multiple? %>

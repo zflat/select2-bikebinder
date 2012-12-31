@@ -8,7 +8,8 @@ module Select2BikeBinder
           :multiple => false,
           :compact => false,
           :value => "",
-          :width=>nil
+          :width=>nil,
+          :form =>nil
         }
       end
 
@@ -19,7 +20,7 @@ module Select2BikeBinder
       def css_class
         unless @css
           @css = self.class.selector_class
-          [:multiple, :compact].each do |flag|
+            flags_for_css_classes.each do |flag|
             @css += " #{flag}" if self.send(flag)
           end
         end
@@ -30,17 +31,21 @@ module Select2BikeBinder
         "width:#{width}" if width
       end
 
-      def initialize(id, optns = {})
-        @id = id
+      def initialize(scope, optns = {})
         @opt = optns
+        init_scope(scope)
         mash(options)
         init_flags([:multiple, :compact])
       end
-
-      attr_reader :id, :flags
+      
+      attr_reader :flags
 
       def to_partial_path
         "#{partial_path_root}/#{ActiveSupport::Inflector::underscore(class_name)}"
+      end
+      
+      def select
+        (form?) ? @form.select : select_tag
       end
 
       def options
@@ -48,12 +53,39 @@ module Select2BikeBinder
         @full_options
       end
 
+      private
+      
       def class_name
         self.class.to_s.split('::')[-1]      
       end
-
-      private
-
+      
+      # List of options that can be
+      # checked for true/false
+      def flaggable_optns
+        f = [:form]
+        (flags_for_css_classes.concat(f)).uniq
+      end
+      
+      # List of flags that can be specified
+      # in the css_class
+      # 
+      def flags_for_css_classes
+        [:multiple, :compact]
+      end
+      
+      def init_scope(scope)
+        if scope.respond_to?(:select)
+          @form = scope
+        elsif scope.respond_to?(:to_s)
+          @id = scope.to_s
+        end
+        @opt.merge!({:form=>@form,:id=>@id})
+      end
+    
+      # Creates val? methods for each val in flags
+      #
+      # @param flags Array of vals
+      #
       def init_flags(flags)
         @flags ||= []
         @flags << flags

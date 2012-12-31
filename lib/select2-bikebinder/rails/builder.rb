@@ -18,6 +18,14 @@ module Select2BikeBinder
       def default_options
         super.merge({:width=>'200px'})
       end
+
+      # List of [value,id] pairs to use
+      # for building select options
+      def optns_list
+        ColorNameI18n::keys.map do |k| 
+          [ColorNameI18n::Color.new(k).name.capitalize, k]
+        end
+      end
     end
 
     class ModelNestedBrandSelect < SelectBuilder
