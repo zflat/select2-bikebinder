@@ -9,7 +9,8 @@ module Select2BikeBinder
           :compact => false,
           :value => "",
           :width=>nil,
-          :form =>nil
+          :form =>nil,
+          :param_key => nil
         }
       end
 
@@ -35,7 +36,7 @@ module Select2BikeBinder
         @opt = optns
         init_scope(scope)
         mash(options)
-        init_flags([:multiple, :compact])
+        init_flags(flaggable_optns)
       end
       
       attr_reader :flags
@@ -44,9 +45,9 @@ module Select2BikeBinder
         "#{partial_path_root}/#{ActiveSupport::Inflector::underscore(class_name)}"
       end
       
-      def select
-        (form?) ? @form.select : select_tag
-      end
+#      def select
+#        (form?) ? @form.select : select_tag
+#      end
 
       def options
         @full_options ||= default_options.merge @opt

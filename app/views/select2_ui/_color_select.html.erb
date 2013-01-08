@@ -1,23 +1,24 @@
 <% obj = color_select %>
 
-<% if obj.multiple? %>
+<% if obj.multiple && obj.form? %>
 
-<%=  hidden_field_tag(
-    obj.id, obj.value, 
-    :style=>obj.css_style, :class=>obj.css_class
+  <%= obj.form.hidden_field(obj.param_key, :value=>obj.value, :style=>obj.css_style, :class=>obj.css_class) %>
+
+<% elsif !obj.multiple? && obj.form? %>
+
+  <%= obj.form.select(obj.param_key, options_for_select([['','']]+obj.optns_list, obj.value), options={}, 
+      html_options = {:class=>obj.css_class, :style=>obj.css_style}) %>
+
+<% elsif obj.multiple? && !obj.form? %>
+
+    <%=  hidden_field_tag(
+	 obj.id, obj.value, 
+	 :style=>obj.css_style, :class=>obj.css_class
     ) %>
-<% else %>
 
-<%= select_tag(obj.id, options_for_select(obj.optns_list)) %>
+<% else !obj.multiple?  && !obj.form? %>
 
-<select id="<%= obj.id %>" style="<%= obj.css_style %>" class="<%= obj.css_class %>">
-  <option value=""></option>
-  <%   ColorNameI18n::keys.each do |k|     %>
-  <% n = ColorNameI18n::Color.new(k).name.capitalize %>
-  <option value="<%= k %>"><%= n %></option>
-  <% end %>
-</select>
+  <%= select_tag(obj.id, options_for_select([['','']]+obj.optns_list, obj.value), 
+      :class=>obj.css_class, :style=>obj.css_style) %>
 
-
-
-<% end # if obj.multiple? %>
+<% end %>

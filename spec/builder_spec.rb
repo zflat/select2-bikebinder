@@ -32,6 +32,10 @@ module Select2BikeBinder
           expect(@b.multiple?).to eq(@b.multiple)
         end
 
+        it "should have flag form" do
+          expect(@b.form?).to eq(@b.form)
+        end
+
         it "should have flag compact" do
           expect(@b.compact?).to eq(@b.compact)
         end
