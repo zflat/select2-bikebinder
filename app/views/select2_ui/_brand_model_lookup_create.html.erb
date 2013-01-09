@@ -1,0 +1,35 @@
+<style>
+table.brand_model_action tr td{
+  border:1px solid #999;
+  border-width: 1px 0px 0px 0px;
+  margin: 0px;
+}  
+</style>
+
+<% f = form_builder %>
+<p>Brand and Model Information</p>
+<table class="brand_model_action">
+
+  <tr>
+    <td>
+      <%= f.radio_button :brand_action, 'lookup', :checked => true %>
+      <%= f.label :brand_action, "Lookup", :value => 'lookup' %>
+    </td>
+    <td>
+      <% nested_model_optns = {:param_key => 'brand_model'} %>
+      <%=  render Select2BikeBinder::Builder::ModelNestedBrandSelect.new(f, nested_model_optns ) %>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
+      <%= f.radio_button :brand_action, 'create', :checked => false %>
+      <%= f.label :brand_action, "Create", :value=>"create" %>
+    </td>
+    <td>
+      <%= f.label :bike_brand, "Brand" %>
+      <br />
+      <%= f.label :bike_model, "Model" %>
+    </td>
+  </tr>
+</table>
