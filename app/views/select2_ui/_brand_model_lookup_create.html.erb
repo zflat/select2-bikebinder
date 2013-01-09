@@ -28,8 +28,11 @@ table.brand_model_action tr td{
     </td>
     <td>
       <%= f.label :bike_brand, "Brand" %>
+      <% bike_brand_optns = {:param_key => 'bike_brand'} %>
+      <%= render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
       <br />
       <%= f.label :bike_model, "Model" %>
+      <%= f.text_field :bike_model, :required => false %>
     </td>
   </tr>
 </table>
