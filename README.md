@@ -52,6 +52,7 @@ Add the following to your `app/assets/javascripts/application.js`:
 	// scripts for each select2 interface element
 	//= require select2/wheel_select
 	//= require select2/color_select
+        //= require select2/bike_model_brand_select
 
 ### Include select2-rails stylesheet assets
 
@@ -73,10 +74,18 @@ Add to your `app/assets/stylesheets/application.css`:
 
 	     select_init(sel2.ColorSelectBuilder, 
 	     {selector:"<%="*.#{Select2BikeBinder::Builder::ColorSelect.selector_class}"%>"});
+
+             select_init(sel2.ModelNestedBrandSelectBuilder, 
+             {selector:"<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>",
+             optns:{api_url:"<%= search_api_v1_bike_mfg_queries_url  %>"}});
 	   }
 	);}
 	
 	</script>
+
+        <h1>Examples</h1>
+        <h2>Stand-alone selects</h2>
+        <%=  render Select2BikeBinder::Builder::ModelNestedBrandSelect.new('me2b') %>
 	
 	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e2b', :multiple=>true, :value=>"622,559,630") %>
 
@@ -86,6 +95,21 @@ Add to your `app/assets/stylesheets/application.css`:
 
 
         <%=  render Select2BikeBinder::Builder::ColorSelect.new( 's5c', :multiple=>true, :compact=>false) %>
+
+        <h2>Form-builder selects</h2>
+
+        <%= form_for(@obj, :url => root_path) do |f| %>
+          <%= f.label :color, "Color" %>
+          <% color_optns = {:multiple=>false, :param_key => 'color', :value=>bike.color.key} %>
+          <%= render Select2BikeBinder::Builder::ColorSelect.new f, color_optns %>
+
+	  <%= f.label :wheel_size, "Wheel Size" %>
+	  <%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new(f,
+          :param_key=>'wheel_size', :multiple=>false, :value=>bike.wheel_size, :width=>"90%") %>
+
+	  
+       <% end %>
+
 
 # License
 
