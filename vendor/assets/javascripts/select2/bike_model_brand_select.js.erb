@@ -35,7 +35,47 @@
 
 	    $(configs.selector).select2(params);    
 	} // this.build = function
-    }
+    } //  var ModelNestedBrandSelectBuilder
+
+    var BrandSelectBuilder = function(conf){	
+	var configs = sel2mix.parsed_conf(conf)		
+	configs.api_url = conf.api_url
+
+	var msg =  sel2mix.obj_merge(
+	    [I18n.translate('sel2ui.messages')]
+	)
+
+	this.build = function(){
+	    var params = {
+	    	placeholder: "Search for a bike brand",
+		minimumInputLength: 3,
+		ajax: {
+		    url: configs.api_url,
+		    dataType: 'json',
+		    data: function (term, page) {
+			return {
+			    q: term, // search term
+			};
+		    },
+		    results: function(data, page) {
+			// parse the results into the format expected by Select2.
+			return data;
+		    }
+		},
+		formatResult: function(item){
+		    return item.text;
+		}, 
+		formatSelection: function(item){
+		    return item.text
+		},
+		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
+	}
+
+	    $(configs.selector).select2(params);    
+	} // this.build = function
+
+    } // var BrandSelectBuilder
+
 
     // Public access to the buildier
     this.ModelNestedBrandSelectBuilder = function(args){
