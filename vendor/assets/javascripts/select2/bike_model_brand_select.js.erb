@@ -78,12 +78,18 @@
 
 
     // Public access to the buildier
-    this.ModelNestedBrandSelectBuilder = function(args){
-	return new ModelNestedBrandSelectBuilder(args)
+    this.ModelNestedBrandSelectBuilder = {
+	selector:"<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>",
+	build:function(args){
+	    return (new ModelNestedBrandSelectBuilder(args)).build()
+	}
     }
 
-    this.BrandSelectBuilder = function(args){
-	return new BrandSelectBuilder(args)
+    this.BrandSelectBuilder = {
+	selector:"<%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>",
+	build:function(args){
+	    return (new BrandSelectBuilder(args)).build()
+	}
     }
 
 }).apply(sel2); // apply to the sel2 namespace

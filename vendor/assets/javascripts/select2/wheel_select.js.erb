@@ -205,8 +205,10 @@
     } // var WheelSelectBuilder = fuction(args)
 
     // Public access to the buildier
-    this.WheelSelectBuilder = function(args){
-	return (new WheelSelectBuilder(args))
+    this.WheelSelectBuilder = {
+	selector:"<%="*.#{Select2BikeBinder::Builder::WheelDiameterSelect.selector_class}"%>",
+	build:function(args){
+	    return (new WheelSelectBuilder(args)).build()
+	}
     }
-
 }).apply(sel2); // apply to the sel2 namespace

@@ -69,15 +69,12 @@ Add to your `app/assets/stylesheets/application.css`:
 	     
 	$(document).ready(
 	  function() { 
-	     select_init(sel2.WheelSelectBuilder, 
-	     {selector:"<%="*.#{Select2BikeBinder::Builder::WheelDiameterSelect.selector_class}"%>"});
+	     select_init(sel2.WheelSelectBuilder)
 
-	     select_init(sel2.ColorSelectBuilder, 
-	     {selector:"<%="*.#{Select2BikeBinder::Builder::ColorSelect.selector_class}"%>"});
+	     select_init(sel2.ColorSelectBuilder)
 
              select_init(sel2.ModelNestedBrandSelectBuilder, 
-             {selector:"<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>",
-             optns:{api_url:"<%= search_api_v1_bike_mfg_queries_url  %>"}});
+             {optns:{api_url:"<%= search_api_v1_bike_mfg_queries_url %>"}});
 	   }
 	);}
 	

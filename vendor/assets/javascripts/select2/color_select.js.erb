@@ -85,10 +85,12 @@
 
     } // ColorSelectBuilder
     
-    
     // Public access to the buildier
-    this.ColorSelectBuilder = function(args){
-	return new ColorSelectBuilder(args)
+    this.ColorSelectBuilder = {
+	selector:"<%="*.#{Select2BikeBinder::Builder::ColorSelect.selector_class}"%>",
+    	build: function(args){
+	    return (new ColorSelectBuilder(args)).build()
+	}
     }
     
 }).apply(sel2); // apply to the sel2 namespace

@@ -440,13 +440,23 @@ var sel2 = {}, sel2mix = {};
     "use strict"
 
     sel2mix.asCapitalizer.call(this)
+
+    // Initialize event listeners for the
+    // brand/model assignment user controls
+    this.brand_model_assignment_init = function(){
+	var selector = ""
+    }
     
+    // Initializes all the selects associated with
+    // the given builder. 
+    // Call this with each type of select being used.
+    //
     this.select_init = function (builder, args){
 	if(!I18n || !I18n.translate){
 	    throw(new Error("I18n not supported"))
 	}
 
-	var selector = args.selector
+	var selector = builder.selector
 	jQuery.each(jQuery(selector), function(index){
 	    // get the id
 	    var id = this.id
@@ -457,10 +467,11 @@ var sel2 = {}, sel2mix = {};
 	    var comp = input.hasClass('compact')
 
 	    var optns = {id:this.id, multiple:mul, compact:comp}
-	    var sel_params = sel2mix.obj_merge([optns, args.optns])
+	    var arg_optns = (args) ? args.optns : {}
 	    
-	    var sel = new builder(sel_params)
-	    sel.build()
+	    var sel_params = sel2mix.obj_merge([optns, arg_optns])
+	    
+	    builder.build(sel_params)
 	})
 	    }
 }).apply(sel2); // apply to the sel2 namespace
