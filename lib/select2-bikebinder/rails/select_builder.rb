@@ -7,10 +7,11 @@ module Select2BikeBinder
         {
           :multiple => false,
           :compact => false,
+          :disable => false,
           :value => "",
           :width=>nil,
           :form =>nil,
-          :param_key => nil
+          :param_key => nil,
         }
       end
 
@@ -71,7 +72,7 @@ module Select2BikeBinder
       # in the css_class
       # 
       def flags_for_css_classes
-        [:multiple, :compact]
+        [:multiple, :compact, :disable]
       end
       
       def init_scope(scope)

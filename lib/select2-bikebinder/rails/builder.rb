@@ -2,6 +2,26 @@
 require_relative 'select_builder'
 
 module Select2BikeBinder
+  module DynamicOptnsMix
+    def css_class
+      unless @css
+        @css = super
+        @css += " bigdrop"
+        @css += " tagging" if tagging?
+      end
+      @css
+    end
+    
+    def flaggable_optns
+      f = [:tagging]
+      super.concat(f).uniq
+    end
+    
+    def to_partial_path
+      "#{partial_path_root}/hidden_input_select"
+    end    
+  end # DynamicOptnsMix
+
   module Builder
 
     class WheelDiameterSelect < SelectBuilder
@@ -34,46 +54,30 @@ module Select2BikeBinder
     end # class ColorSelect
 
     class ModelNestedBrandSelect < SelectBuilder
+      include DynamicOptnsMix
       def self.selector_class; "bike_model_nested_brand_sel" end
-
       def default_options
-        super.merge({:width=>'600px'})
+        super.merge({:width=>'600px', :tagging=>false})
       end
-
-      def css_class
-        unless @css
-          @css = super
-          @css += " bigdrop"
-        end
-        @css
-      end
-
-      def to_partial_path
-        "#{partial_path_root}/hidden_input_select"
-      end
-
     end # class ModelNestedBrandSelect
 
     class BrandSelect < SelectBuilder
+      include DynamicOptnsMix
       def self.selector_class; "bike_brand_sel" end      
-
       def default_options
-        super.merge({:width=>'600px'})
+        super.merge({:width=>'300px', :tagging=>false})
       end
+    end # class Brand Select
 
-      def css_class
-        unless @css
-          @css = super
-          @css += " bigdrop"
-        end
-        @css
+    class ModelSelect < SelectBuilder
+      include DynamicOptnsMix
+      def self.selector_class; "bike_model_sel" end      
+      def default_options
+        super.merge({:width=>'300px', :tagging=>false})
       end
-
-      def to_partial_path
-        "#{partial_path_root}/hidden_input_select"
-      end
-
     end # class Brand Select
 
   end # module Builder
+
+
 end # module Select2BikeBinder

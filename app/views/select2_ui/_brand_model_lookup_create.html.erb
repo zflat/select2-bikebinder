@@ -1,22 +1,22 @@
+<% css_sel = Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class  %>
 <style>
-table.brand_model_action tr td{
+table.<%=css_sel%> tr td{
   border:1px solid #999;
   border-width: 1px 0px 0px 0px;
   margin: 0px;
-}  
+}
 </style>
 
 <% f = form_builder %>
 <p>Brand and Model Information</p>
-<table class="brand_model_action">
-
+<table class="<%=Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>">
   <tr>
     <td>
       <%= f.radio_button :brand_action, 'lookup', :checked => true %>
       <%= f.label :brand_action, "Lookup", :value => 'lookup' %>
     </td>
-    <td>
-      <% nested_model_optns = {:param_key => 'brand_model'} %>
+    <td class="lookup">
+      <% nested_model_optns = {:param_key => 'brand_model', :tagging=>true} %>
       <%=  render Select2BikeBinder::Builder::ModelNestedBrandSelect.new(f, nested_model_optns ) %>
     </td>
   </tr>
@@ -26,13 +26,17 @@ table.brand_model_action tr td{
       <%= f.radio_button :brand_action, 'create', :checked => false %>
       <%= f.label :brand_action, "Create", :value=>"create" %>
     </td>
-    <td>
+    <td class="create">
       <%= f.label :bike_brand, "Brand" %>
-      <% bike_brand_optns = {:param_key => 'bike_brand'} %>
+      <% bike_brand_optns = {:param_key => 'bike_brand', :enabled=>false, 
+      :tagging=>true, :disable=>true} %>
       <%= render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
       <br />
       <%= f.label :bike_model, "Model" %>
-      <%= f.text_field :bike_model, :required => false %>
+      <% bike_model_optns = {:param_key => 'bike_model', :enabled=>false, 
+      :tagging=>true, :disable=>true} %>
+      <% f.text_field :bike_model, :required => false %>
+      <%= render Select2BikeBinder::Builder::ModelSelect.new(f, bike_model_optns) %>
     </td>
   </tr>
 </table>

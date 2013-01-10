@@ -1,11 +1,68 @@
 (function(){
+
+
     var ModelNestedBrandSelectBuilder = function(conf){	
+
         var configs = sel2mix.parsed_conf(conf)		
 	configs.api_url = conf.api_url
 
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('sel2ui.messages')]
 	)
+
+
+	/*
+	  Tagging mode for bike model nested brands.
+	  
+	  Tagging implies that the select element is used 
+	  for brand_model_lookup_create.
+	  
+	  This is where the model is found from a lookup, or a
+	  new model is added (as selected option) if the 
+	  correct model is not found.
+	  
+	  It may also be necessary to add a new brand when
+	  adding a new model.
+	*/
+	var container_selector = "table.<%= Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>"
+	var enable_map = {
+	    lookup:{lookup:true,create:false},
+	    create:{lookup:false,create:true}
+	}
+	var enable_sel_elements = function(enable, group){
+	    var inner_container = jQuery(container_selector+" td."+group)
+	    var command = (enable) ? 'enable' : 'disable'
+	    
+	    inner_container.children('input').each(function(){
+		jQuery(this).select2(command)
+	    })
+
+		// coerce the radio to match enabled status
+		var radio = jQuery(container_selector+" input[value="+group+"]:radio")
+	    radio.attr('checked', enable)
+	}
+	var toggle_elements = function(e){
+	    var element = jQuery(e.target)
+	    var optn = element.attr('value')
+	    var checked = !!element.attr('checked')
+	    
+	    enable_sel_elements(enable_map[optn]['lookup'] && checked, 'lookup')
+	    enable_sel_elements(enable_map[optn]['create'] && checked, 'create')
+	}
+
+	// Accessor method that indicates what input
+	// is active when in tagging mode
+	var active_input_group = function(){
+	    if(configs.tagging){
+		jQuery(container_selector+" [type=radio]input").each(function(){
+		    if(btn.attr('checked')){
+			return btn.attr('value')
+		    }
+		})
+		    }
+	    return null;
+	}
+
 
 	this.build = function(){
 	    var params = {
@@ -31,10 +88,27 @@
 		    return '<strong>'+item.brand+',</strong> ' + item.text
 		},
 		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
-	}
+	    } // params ={...}
 
 	    $(configs.selector).select2(params);    
+
+	    if(configs.tagging){
+		// Put model nested brands into tagging mode
+		// Attach Enable/Disable events
+		jQuery(container_selector+" [type=radio]input").each(function(){
+		    var btn = jQuery(this)
+		    btn.on('change', toggle_elements)
+		})
+		//enable_sel_elements(true, 'lookup')
+		//enable_sel_elements(false, 'create')
+		    // need a way to initialize enable/disable
+	    }
+
+	    
+
 	} // this.build = function
+
+
     } //  var ModelNestedBrandSelectBuilder
 
     var BrandSelectBuilder = function(conf){	
@@ -69,12 +143,55 @@
 		    return item.text
 		},
 		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
-	}
+	    }
 
 	    $(configs.selector).select2(params);    
+
 	} // this.build = function
 
     } // var BrandSelectBuilder
+
+
+    var ModelSelectBuilder = function(conf){	
+	var configs = sel2mix.parsed_conf(conf)		
+	configs.api_url = conf.api_url
+
+	var msg =  sel2mix.obj_merge(
+	    [I18n.translate('sel2ui.messages')]
+	)
+
+	this.build = function(){
+	    var params = {
+	    	placeholder: "Search for a bike model",
+		minimumInputLength: 3,
+		ajax: {
+		    url: configs.api_url,
+		    dataType: 'json',
+		    data: function (term, page) {
+			return {
+			    q: term, // search term
+			};
+		    },
+		    results: function(data, page) {
+			// parse the results into the format expected by Select2.
+			return data;
+		    }
+		},
+		formatResult: function(item){
+		    return item.text;
+		}, 
+		formatSelection: function(item){
+		    return item.text
+		},
+		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
+	    }
+
+	    $(configs.selector).select2(params);    
+
+	} // this.build = function
+
+    } // var BikeModelSelectBuilder
+
 
 
     // Public access to the buildier
@@ -89,6 +206,13 @@
 	selector:"<%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>",
 	build:function(args){
 	    return (new BrandSelectBuilder(args)).build()
+	}
+    }
+
+    this.ModelSelectBuilder = {
+	selector:"<%="*.#{Select2BikeBinder::Builder::ModelSelect.selector_class}"%>",
+	build:function(args){
+	    return (new ModelSelectBuilder(args)).build()
 	}
     }
 

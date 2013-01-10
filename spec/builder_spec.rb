@@ -40,6 +40,10 @@ module Select2BikeBinder
           expect(@b.compact?).to eq(@b.compact)
         end
 
+        it "should have flag disable=false by default" do
+          expect(@b).to_not be_disable
+        end
+
         it "should have the correct id attribute" do
           expect(@b.id).to eq(@id)
         end
@@ -77,6 +81,38 @@ module Select2BikeBinder
           expect(@w.width).to eq(@width)
         end
       end
-    end
+    end # descrive WheelDiameterSelect
+
+    describe ModelNestedBrandSelect do
+      describe "a vanilla instance" do
+        before :each do
+          @m =  ModelNestedBrandSelect.new('test')
+        end
+
+        it "should have to_partial_path" do
+          expect(@m.to_partial_path).to_not eq(nil)
+        end
+
+        it "should have a tagging? flag" do
+          expect(@m).to_not be_tagging
+        end
+      end
+      
+      describe "with tagging mode" do
+        before :each do
+          @m =  ModelNestedBrandSelect.new('test', :tagging=>true)
+        end
+
+        it "should be tagging" do
+          expect(@m).to be_tagging
+        end
+
+        it "should have tagging in css class" do
+          expect(@m.css_class =~ /tagging/).to be_true
+        end
+      end # "with tagging mode"
+
+    end #  describe ModelNestedBrandSelect 
+
   end # module Builder
 end # module Select2BikeBinder

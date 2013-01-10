@@ -322,7 +322,9 @@ var sel2 = {}, sel2mix = {};
 	    id: id,
 	    allow_multiple: opt.multiple,
 	    selector: '#'+id,
-	    disp_compact: opt.compact
+	    disp_compact: opt.compact,
+	    tagging: opt.tagging,
+	    init_disable: opt.disable
 	}
     }
 
@@ -461,17 +463,36 @@ var sel2 = {}, sel2mix = {};
 	    // get the id
 	    var id = this.id
 	    var input = jQuery('#'+id)
-	    
-	    // get options
+
+	    /////////////////////////
+	    // Options as paramaters
+
 	    var mul = input.hasClass('multiple')
 	    var comp = input.hasClass('compact')
+	    var disbl = input.hasClass('disable')
 
-	    var optns = {id:this.id, multiple:mul, compact:comp}
+	    // Tagging refers to allowing the
+	    // users to select their input as an
+	    // option exactly as they entered it
+	    //
+	    // Implementation of tagging differs for
+	    // each builder
+	    var tag_mode = input.hasClass('tagging')
+
+	    // options from css class
+	    var optns = {id:this.id, multiple:mul, compact:comp, tagging:tag_mode, disable:disbl}	    
+	    // options from args
 	    var arg_optns = (args) ? args.optns : {}
-	    
+
+	    // Combine all the options to create the select parameters	    
 	    var sel_params = sel2mix.obj_merge([optns, arg_optns])
 	    
 	    builder.build(sel_params)
+
+	    // enable/dissable as specified by params
+	    if(sel_params.disable){
+		jQuery('#'+sel_params.id).select2('disable')
+	    }
 	})
 	    }
 }).apply(sel2); // apply to the sel2 namespace
