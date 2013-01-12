@@ -5,6 +5,9 @@ var sel2 = {}, sel2mix = {};
 (function (){ //sel2mix namespace
     "use strict"
 
+    this.q_delay = 150
+    this.TAGGING_ID = function(){return -1}
+
     // stackoverflow.com/questions/
     // 1026069/capitalize-the-first-letter-of-string-in-javascript	
     this.asCapitalizer = function(ignore_list){
@@ -27,6 +30,25 @@ var sel2 = {}, sel2mix = {};
 	this.invalid_search = function(term){
 	    return term.length<min_limit
 	}
+    }
+
+    this.tagFlatResults = function(data, page) {
+	// parse the results into the format expected by Select2.
+	var q = data.q.toLowerCase()
+	
+	// Make sure the term is not already a search result
+	for(var i=0; i<data.results.length; i++){
+	    if(q == data.results[i].text.toLowerCase()){
+		return data
+	    }
+	}
+	
+	// Add the term as an option
+	data.results.unshift({
+	    id:sel2mix.TAGGING_ID(),
+	    text:data.q
+	})
+	return data;
     }
 
     this.asOuterMatcher = function(arr_attribs, objT, inner_matcher_fn){
@@ -308,10 +330,14 @@ var sel2 = {}, sel2mix = {};
 	
     } // asNoMatchStaticMessenger
 
+    this.clear_selection = function(selector){
+	jQuery(selector).select2("data","");	
+    }
+
     this.asClearable = function(selector){
 	var sel_id = selector
 	this.clear_selection = function(){
-	    jQuery(selector).select2("data","");
+	    sel2mix.clear_selection(selector)
 	}
     }
 

@@ -1,6 +1,5 @@
 (function(){
 
-
     var ModelNestedBrandSelectBuilder = function(conf){	
 
         var configs = sel2mix.parsed_conf(conf)		
@@ -10,6 +9,7 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
+	sel2mix.asClearable.call(this, configs.selector)
 
 	/*
 	  Tagging mode for bike model nested brands.
@@ -25,20 +25,30 @@
 	  adding a new model.
 	*/
 	var container_selector = "table.<%= Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>"
+	var inner_container_selector = function(group){
+	    return (container_selector+" td."+group)
+	}
+
+
 	var enable_map = {
 	    lookup:{lookup:true,create:false},
 	    create:{lookup:false,create:true}
 	}
+
 	var enable_sel_elements = function(enable, group){
-	    var inner_container = jQuery(container_selector+" td."+group)
+	    var inner_container = 
+		jQuery(inner_container_selector(group))
 	    var command = (enable) ? 'enable' : 'disable'
-	    
+
 	    inner_container.children('input').each(function(){
 		jQuery(this).select2(command)
+		if(! enable ){
+		    sel2mix.clear_selection(this)
+		}
 	    })
 
-		// coerce the radio to match enabled status
-		var radio = jQuery(container_selector+" input[value="+group+"]:radio")
+            // coerce the radio to match enabled status
+	    var radio = jQuery(container_selector+" input[value="+group+"]:radio")
 	    radio.attr('checked', enable)
 	}
 	var toggle_elements = function(e){
@@ -63,27 +73,82 @@
 	    return null;
 	}
 
+	var trigger_tagging_action = function(e){
+	    if(e.val != sel2mix.TAGGING_ID()){
+		return
+	    }
+	    
+	    // Get the brand for the given trigger
+	    // Need to do this before clearing the select
+	    var data = jQuery(configs.selector).select2('data')
+	    var b_id = data.brand_id
+	    console.log(b_id)
+
+	    // force a toggle of the interface
+	    enable_sel_elements(false, 'lookup')
+	    enable_sel_elements(true, 'create')
+
+	    // select the brand
+	    var inner_container = 
+		jQuery(inner_container_selector('create'))
+	    var brand_sel_class =
+		inner_container_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
+	    jQuery(brand_sel_class).
+		select2('data', {id:b_id,text:data.brand})
+	    
+	    // open the model select
+	    var model_sel_class = 
+		inner_container_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::ModelSelect.selector_class}"%>"
+	    jQuery(model_sel_class).select2('open')
+	}
+
+
+	var tagging_link = function(brand_node){
+	    return {brand:brand_node.text,
+		    brand_id:brand_node.brand_id,
+		    id:sel2mix.TAGGING_ID(),
+		    text:"Enter a new "+brand_node.text+" model."}
+	}
+
+
+	// parse the results into the format expected by Select2.
+	var query_parser = function(data, page) {
+
+	    var arr = data.results
+	    for(var i=0; i<arr.length; i++){
+		if(arr[i].direct){
+		    arr[i].children.unshift(tagging_link(arr[i]))
+		}
+	    }
+
+	    data.results = arr;
+	    return data;
+	}
 
 	this.build = function(){
 	    var params = {
 	    	placeholder: "Search for a bike brand or model",
-		minimumInputLength: 3,
+		minimumInputLength: 2,
+		allowClear:true,
 		ajax: {
 		    url: configs.api_url,
 		    dataType: 'json',
-		    quietMillis: 500,
+		    quietMillis: sel2mix.q_delay,
 		    data: function (term, page) {
 			return {
 			    q: term, // search term
 			};
 		    },
-		    results: function(data, page) {
-			// parse the results into the format expected by Select2.
-			return data;
-		    }
+		    results: query_parser
 		},
 		formatResult: function(item){
-		    return item.text;
+		    if(item.id == sel2mix.TAGGING_ID()){
+			return "<em style='text-decoration: underline;'>"+item.text+'...</i>'
+		    }else{
+			return item.text
+		    }
 		}, 
 		formatSelection: function(item){
 		    return '<strong>'+item.brand+',</strong> ' + item.text
@@ -91,8 +156,8 @@
 		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
 	    } // params ={...}
 
-	    $(configs.selector).select2(params);    
-
+	    jQuery(configs.selector).select2(params);    
+	    
 	    if(configs.tagging){
 		// Put model nested brands into tagging mode
 		// Attach Enable/Disable events
@@ -100,9 +165,7 @@
 		    var btn = jQuery(this)
 		    btn.on('change', toggle_elements)
 		})
-		//enable_sel_elements(true, 'lookup')
-		//enable_sel_elements(false, 'create')
-		    // need a way to initialize enable/disable
+	        jQuery(configs.selector).on("change", trigger_tagging_action)
 	    }
 
 	    
@@ -120,23 +183,25 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
+	var query_parse = (configs.tagging) ? 
+	    sel2mix.tagFlatResults :
+	    function(data, page){return data}
+
 	this.build = function(){
 	    var params = {
 	    	placeholder: "Search for a bike brand",
-		minimumInputLength: 3,
+		minimumInputLength: 2,
+		allowClear: true,
 		ajax: {
 		    url: configs.api_url,
 		    dataType: 'json',
-		    quietMillis: 500,
+		    quietMillis: sel2mix.q_delay,
 		    data: function (term, page) {
 			return {
 			    q: term, // search term
 			};
 		    },
-		    results: function(data, page) {
-			// parse the results into the format expected by Select2.
-			return data;
-		    }
+		    results: query_parse
 		},
 		formatResult: function(item){
 		    return item.text;
@@ -162,14 +227,19 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
+	var query_parse = (configs.tagging) ? 
+	    sel2mix.tagFlatResults :
+	    function(data, page){return data}
+
 	this.build = function(){
 	    var params = {
 	    	placeholder: "Search for a bike model",
-		minimumInputLength: 3,
+		minimumInputLength: 2,
+		allowClear: true,
 		ajax: {
 		    url: configs.api_url,
 		    dataType: 'json',
-		    quietMillis: 500,
+		    quietMillis: sel2mix.q_delay,
 		    data: function (term, page) {
 			return {
 			    q: term, // search term
@@ -196,7 +266,7 @@
     } // var BikeModelSelectBuilder
 
 
-
+    
     // Public access to the buildier
     this.ModelNestedBrandSelectBuilder = {
 	selector:"<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>",
