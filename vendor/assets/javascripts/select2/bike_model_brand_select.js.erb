@@ -24,11 +24,9 @@
 	  It may also be necessary to add a new brand when
 	  adding a new model.
 	*/
-	var container_selector = "table.<%= Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>"
-	var inner_container_selector = function(group){
-	    return (container_selector+" td."+group)
-	}
-
+	var ui_container = new sel2mix.BikeBMContainer()
+	var container_selector = ui_container.selector()
+	var inner_container_selector = ui_container.inner_selector
 
 	var enable_map = {
 	    lookup:{lookup:true,create:false},
@@ -227,6 +225,24 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
+	var ui_container = new sel2mix.BikeBMContainer()
+
+	var constraints = function(){
+	    var brand_sel_class = 
+		ui_container.inner_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
+	    data = jQuery(brand_sel_class).select2('data') || {id:''}
+	    
+	    return (data.id != sel2mix.TAGGING_ID()) ? {brand:data.id} : {}
+	}
+	
+	var query_data = function(term, page){
+	    // create the request parameters
+	    return sel2mix.obj_merge(
+		[{q: term}, constraints()])
+	}
+
+	// parse the results into the format expected by Select2.
 	var query_parse = (configs.tagging) ? 
 	    sel2mix.tagFlatResults :
 	    function(data, page){return data}
@@ -240,15 +256,8 @@
 		    url: configs.api_url,
 		    dataType: 'json',
 		    quietMillis: sel2mix.q_delay,
-		    data: function (term, page) {
-			return {
-			    q: term, // search term
-			};
-		    },
-		    results: function(data, page) {
-			// parse the results into the format expected by Select2.
-			return data;
-		    }
+		    data: query_data,
+		    results: query_parse
 		},
 		formatResult: function(item){
 		    return item.text;

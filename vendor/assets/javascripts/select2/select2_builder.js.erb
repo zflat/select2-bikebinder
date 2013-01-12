@@ -461,6 +461,26 @@ var sel2 = {}, sel2mix = {};
     }
 
 
+    this.BikeBMContainer = function(){
+
+	var container_selector = function(){
+	    return "table.<%= Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>"
+	}
+
+	var inner_container_selector = function(group){
+	    return (container_selector()+" td."+group)
+	};
+
+	this.selector=function(){
+	    return container_selector()
+	}
+
+	this.inner_selector=function(arg){
+	    return inner_container_selector(arg)
+	}
+    }
+
+
 }).apply(sel2mix); // apply to the sel2 namespace
 
 
