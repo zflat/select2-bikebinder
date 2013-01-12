@@ -198,12 +198,12 @@ var sel2 = {}, sel2mix = {};
 	    var choices = []
 	    if(term == ""){
 		choices = (this.loaded_full())? optns1: optns0;
-		if(append_header){
-		    choices = append_header(choices);
-		}
 	    }else if(!q.invalid_search(term)){
 		choices = q.search(term, optns1);
 		choices = choices.matches;
+	    }
+	    if(append_header){
+		choices = append_header(choices);
 	    }
 	    return choices
 	}

@@ -63,7 +63,7 @@
 
 	// format for search results
 	var format_results_table = function(size){
-	    if(size.id=="header") {
+	    if(size.header) {
 		return "<table class=\"wheel_opt\"><tr><th class=\"iso\">"
 		    +sel2.capStr(msg.header.iso)+"</th><th class=\"trad\">"
 		    +sel2.capStr(msg.header.trad)+"</th><th class=\"app\">"
@@ -100,7 +100,7 @@
 	var selected_formatter = new  sel2mix.SelectedFormatter(sel_formatters, configs)
 
 	function append_header(choices){
-	    header_option = {id:'header', text:sel2.capStr(placeholder.str())}
+	    header_option = {text:sel2.capStr(placeholder.str()), header:true}
 	    a = choices.slice();
 	    a.unshift(header_option);
 	    return a;
@@ -151,7 +151,7 @@
 	function conditionalClear(e){        
             if(e.val == "header"){
 		clear_selection();
-            } else if(e.added && e.added.id == "header"){
+            } else if(e.added && e.added.header){
 		remove_header_msel();
 	    }
 	}
@@ -166,7 +166,7 @@
 	    var d0 = $(configs.selector).select2("data");
 	    var data = [];
 	    jQuery.each(d0, function(){
-		if(this.id !="header"){
+		if(!this.header){
 		    data.push(this);
 		}
 	    });
