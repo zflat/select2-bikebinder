@@ -34,20 +34,27 @@ var sel2 = {}, sel2mix = {};
 
     this.tagFlatResults = function(data, page) {
 	// parse the results into the format expected by Select2.
-	var q = data.q.toLowerCase()
+	var q = (data.q) ?  data.q.toLowerCase() : ''
 	
 	// Make sure the term is not already a search result
 	for(var i=0; i<data.results.length; i++){
+	    // need to make sure this works so that
+	    // a non-tag gets flagged as a tag
 	    if(q == data.results[i].text.toLowerCase()){
 		return data
 	    }
 	}
-	
-	// Add the term as an option
+
+	if(!data.results){
+	    data.results = []
+	}
+	// Add the term as an option (tag)
 	data.results.unshift({
-	    id:sel2mix.TAGGING_ID(),
-	    text:data.q
+	    id:data.q,
+	    text:"'"+data.q+ "'",
+	    is_tag:true
 	})
+
 	return data;
     }
 

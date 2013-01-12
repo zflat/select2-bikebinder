@@ -16,7 +16,7 @@ table.<%=css_sel%> tr td{
       <%= f.label :brand_action, "Lookup", :value => 'lookup' %>
     </td>
     <td class="lookup">
-      <% nested_model_optns = {:param_key => 'brand_model', :tagging=>true} %>
+      <% nested_model_optns = {:param_key => 'bike_model_id', :tagging=>true} %>
       <%=  render Select2BikeBinder::Builder::ModelNestedBrandSelect.new(f, nested_model_optns ) %>
     </td>
   </tr>
@@ -28,12 +28,12 @@ table.<%=css_sel%> tr td{
     </td>
     <td class="create">
       <%= f.label :bike_brand, "Brand" %>
-      <% bike_brand_optns = {:param_key => 'bike_brand', :enabled=>false, 
+      <% bike_brand_optns = {:param_key => 'bike_brand_id', :enabled=>false, 
       :tagging=>true, :disable=>true} %>
       <%= render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
       <br />
       <%= f.label :bike_model, "Model" %>
-      <% bike_model_optns = {:param_key => 'bike_model', :enabled=>false, 
+      <% bike_model_optns = {:param_key => 'bike_model_name', :enabled=>false, 
       :tagging=>true, :disable=>true} %>
       <% f.text_field :bike_model, :required => false %>
       <%= render Select2BikeBinder::Builder::ModelSelect.new(f, bike_model_optns) %>

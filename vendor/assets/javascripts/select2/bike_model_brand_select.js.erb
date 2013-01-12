@@ -80,7 +80,6 @@
 	    // Need to do this before clearing the select
 	    var data = jQuery(configs.selector).select2('data')
 	    var b_id = data.brand_id
-	    console.log(b_id)
 
 	    // force a toggle of the interface
 	    enable_sel_elements(false, 'lookup')
@@ -107,6 +106,7 @@
 	    return {brand:brand_node.text,
 		    brand_id:brand_node.brand_id,
 		    id:sel2mix.TAGGING_ID(),
+		    is_tag:true,
 		    text:"Enter a new "+brand_node.text+" model."}
 	}
 
@@ -114,7 +114,7 @@
 	// parse the results into the format expected by Select2.
 	var query_parser = function(data, page) {
 
-	    var arr = data.results
+	    var arr = data.results || []
 	    for(var i=0; i<arr.length; i++){
 		if(arr[i].direct){
 		    arr[i].children.unshift(tagging_link(arr[i]))
@@ -142,7 +142,7 @@
 		    results: query_parser
 		},
 		formatResult: function(item){
-		    if(item.id == sel2mix.TAGGING_ID()){
+		    if(item.is_tag){
 			return "<em style='text-decoration: underline;'>"+item.text+'...</i>'
 		    }else{
 			return item.text
@@ -181,6 +181,35 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
+
+	// When the brand changes, the selection
+	// for model is no longer valid, so it
+	// needs to be cleared. 
+	// And for convenience, the selection
+	// should be openend unless the brand is cleared
+	var trigger_model_update = function(e){
+	    if(!configs.tagging){
+		return
+	    }
+
+	    var ui_container = new sel2mix.BikeBMContainer()
+	    var model_sel_class =
+		ui_container.inner_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::ModelSelect.selector_class}"%>"
+	    var model_sel = jQuery(model_sel_class)
+
+	    var brand_sel_class = ui_container.inner_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
+	    var brand_sel = jQuery(brand_sel_class)
+
+	    if(model_sel){
+		sel2mix.clear_selection(model_sel)
+		
+		if(e.val)
+		    model_sel.select2('open')	    
+	    }
+	}
+
 	var query_parse = (configs.tagging) ? 
 	    sel2mix.tagFlatResults :
 	    function(data, page){return data}
@@ -212,6 +241,8 @@
 
 	    $(configs.selector).select2(params);    
 
+	    $(configs.selector).on('change', trigger_model_update);    
+
 	} // this.build = function
 
     } // var BrandSelectBuilder
@@ -233,19 +264,61 @@
 		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
 	    data = jQuery(brand_sel_class).select2('data') || {id:''}
 	    
-	    return (data.id != sel2mix.TAGGING_ID()) ? {brand:data.id} : {}
+	    return (data.is_tag ) ? {id:''} : {brand:data.id}
 	}
 	
 	var query_data = function(term, page){
+	    var brand_sel_class = 
+		ui_container.inner_selector('create')+
+		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
+	    data = jQuery(brand_sel_class).select2('data') || {id:''}
+
 	    // create the request parameters
 	    return sel2mix.obj_merge(
 		[{q: term}, constraints()])
 	}
 
+	// Synchronize the model_id select when in tagging mode
+	var trigger_model_id_update = function(e){
+	    if(!configs.tagging){
+		return
+	    }
+	    sel = jQuery(configs.selector)
+	    data = sel.select2('data')
+
+	    var model_id_sel_class = 
+		ui_container.inner_selector('lookup')+
+		" <%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>"
+	    model_id_sel = jQuery(model_id_sel_class)
+	    model_id_data = model_id_sel.select2('data')
+
+	    // check if the model_id has data
+	    if(!model_id_data){
+		// missing model_id implies that data is a tag
+		data = null
+	    }
+	    if(data && data.is_tag){ data=null}
+	    
+	    if(data){
+		// brand and model info is all in data
+		// update the model_id selection with brand and model information
+		model_id_sel.select2('data', data)
+	    }else{
+		// clear the model_id selection
+		sel2mix.clear_selection(model_id_sel)
+		return
+	    }
+	}
+
 	// parse the results into the format expected by Select2.
-	var query_parse = (configs.tagging) ? 
-	    sel2mix.tagFlatResults :
-	    function(data, page){return data}
+	var query_parse = 
+	    function(data, page){
+		if (configs.tagging) {
+		    return sel2mix.tagFlatResults(data, page)
+		}else{
+		    return data
+		}
+	    }
 
 	this.build = function(){
 	    var params = {
@@ -269,6 +342,9 @@
 	    }
 
 	    $(configs.selector).select2(params);    
+
+
+	    jQuery(configs.selector).on("change", trigger_model_id_update)
 
 	} // this.build = function
 

@@ -74,7 +74,13 @@ Add to your `app/assets/stylesheets/application.css`:
 	     select_init(sel2.ColorSelectBuilder)
 
              select_init(sel2.ModelNestedBrandSelectBuilder, 
-             {optns:{api_url:"<%= search_api_v1_bike_mfg_queries_url %>"}});
+             {optns:{api_url:"<%= bike_mfg_queries_url %>"}});
+
+             select_init(sel2.BrandSelectBuilder, 
+             {optns:{api_url:"<%= search_brands_url %>"}});
+
+             select_init(sel2.ModelSelectBuilder, 
+             {optns:{api_url:"<%= search_models_url %>"}});
 	   }
 	);}
 	
@@ -90,22 +96,28 @@ Add to your `app/assets/stylesheets/application.css`:
 
 	<%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new('e3b', :width=>'200px', :multiple=>true, :compact=>true) %>
 
+	<%= render Select2BikeBinder::Builder::BrandSelect.new('me2b' ) %>
+	
+	<%= render Select2BikeBinder::Builder::ModelSelect.new('b234' ) %>
 
         <%=  render Select2BikeBinder::Builder::ColorSelect.new( 's5c', :multiple=>true, :compact=>false) %>
 
         <h2>Form-builder selects</h2>
 
-        <%= form_for(@obj, :url => root_path) do |f| %>
-          <%= f.label :color, "Color" %>
-          <% color_optns = {:multiple=>false, :param_key => 'color', :value=>bike.color.key} %>
-          <%= render Select2BikeBinder::Builder::ColorSelect.new f, color_optns %>
+	<%= form_for(@obj, :url => root_path) do |f| %>	
+	 <%= f.label :color, "Color" %>
+	 <% color_optns = {:multiple=>false, :param_key => 'color', :value=>bike.color.key} %>
+	 <%= render Select2BikeBinder::Builder::ColorSelect.new f, color_optns %>
 
-	  <%= f.label :wheel_size, "Wheel Size" %>
-	  <%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new(f,
-          :param_key=>'wheel_size', :multiple=>false, :value=>bike.wheel_size, :width=>"90%") %>
+	 <%= f.label :wheel_size, "Wheel Size" %>
+	 <%=  render Select2BikeBinder::Builder::WheelDiameterSelect.new(f,
+	 :param_key=>'wheel_size', :multiple=>false, :value=>bike.wheel_size, :width=>"90%") %>
 
-	  
+	 <div style="border:1px solid #333">
+	 <%= render :partial=>'select2_ui/brand_model_lookup_create', :locals =>{:form_builder =>f} %>  
+	 </div>
        <% end %>
+
 
 
 # License
