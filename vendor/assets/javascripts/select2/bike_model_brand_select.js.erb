@@ -125,11 +125,20 @@
 	    return data;
 	}
 
+	var init_sel = function(element, callback){
+	    var data
+	    // TODO handle case of multiple select vs. single select
+	    console.log(element)
+	    
+	    callback(data)
+	}
+
 	this.build = function(){
 	    var params = {
 	    	placeholder: "Search for a bike brand or model",
 		minimumInputLength: 2,
 		allowClear:true,
+		initSelection: init_sel,
 		ajax: {
 		    url: configs.api_url,
 		    dataType: 'json',

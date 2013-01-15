@@ -55,7 +55,22 @@ module Select2BikeBinder
 
     class ModelNestedBrandSelect < SelectBuilder
       include DynamicOptnsMix
-      def self.selector_class; "bike_model_nested_brand_sel" end
+      class Selector
+        def self.[](arg=nil)
+          arg ||= :class
+          selectors[arg]
+        end
+        private
+        def self.selectors
+          {:class =>"bike_model_nested_brand_sel",
+            :brand_name => "bike_brand_name_input",
+            :brand_id => "bike_brand_id_input",
+            :model_name => "bike_model_name_input"}
+        end
+      end # class Selector
+
+      def self.selector_class; Selector[:class] end
+
       def default_options
         super.merge({:width=>'600px', :tagging=>false})
       end
