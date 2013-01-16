@@ -84,6 +84,13 @@ module Select2BikeBinder
     end # descrive WheelDiameterSelect
 
     describe ModelNestedBrandSelect do
+
+      describe ModelNestedBrandSelect::Selector do
+        it "should have a selector for model name" do
+          expect(ModelNestedBrandSelect::Selector[:model_name]).to_not be_nil
+        end
+      end
+      
       describe "a vanilla instance" do
         before :each do
           @m =  ModelNestedBrandSelect.new('test')
