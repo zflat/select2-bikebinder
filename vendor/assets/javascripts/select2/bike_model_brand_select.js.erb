@@ -24,9 +24,9 @@
 	  It may also be necessary to add a new brand when
 	  adding a new model.
 	*/
-	var ui_container = new sel2mix.BikeBMContainer()
-	var container_selector = ui_container.selector()
-	var inner_container_selector = ui_container.inner_selector
+
+	// Selectors for associated form elements
+	var ui_container = new sel2mix.BikeBMContainer(configs.tagging)
 
 	var enable_map = {
 	    lookup:{lookup:true,create:false},
@@ -34,19 +34,16 @@
 	}
 
 	var enable_sel_elements = function(enable, group){
-	    var inner_container = 
-		jQuery(inner_container_selector(group))
 	    var command = (enable) ? 'enable' : 'disable'
-
-	    inner_container.children('input').each(function(){
+	    ui_container.group(group).children('input').each(function(){
 		jQuery(this).select2(command)
 		if(! enable ){
 		    sel2mix.clear_selection(this)
 		}
-	    })
+	    });
 
-            // coerce the radio to match enabled status
-	    var radio = jQuery(container_selector+" input[value="+group+"]:radio")
+	    // coerce the radio to match enabled status
+	    var radio = jQuery(ui_container.selector()+" input[value="+group+"]:radio")
 	    radio.attr('checked', enable)
 	}
 	var toggle_elements = function(e){
@@ -62,7 +59,7 @@
 	// is active when in tagging mode
 	var active_input_group = function(){
 	    if(configs.tagging){
-		jQuery(container_selector+" [type=radio]input").each(function(){
+		jQuery(ui_container.selector()+" [type=radio]input").each(function(){
 		    if(btn.attr('checked')){
 			return btn.attr('value')
 		    }
@@ -85,20 +82,13 @@
 	    enable_sel_elements(false, 'lookup')
 	    enable_sel_elements(true, 'create')
 
-	    // select the brand
-	    var inner_container = 
-		jQuery(inner_container_selector('create'))
-	    var brand_sel_class =
-		inner_container_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
-	    jQuery(brand_sel_class).
-		select2('data', {id:b_id,text:data.brand})
-	    
-	    // open the model select
-	    var model_sel_class = 
-		inner_container_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::ModelSelect.selector_class}"%>"
-	    jQuery(model_sel_class).select2('open')
+	    // set the brand name
+	    ui_container.input('brand_name').val(data.brand)
+	    // set the brand id
+	    ui_container.input('brand_id').val(data.brand_id)	    
+
+	    // enter the model select
+	    ui_container.input('model_name').triggerHandler('focus')
 	}
 
 
@@ -168,7 +158,7 @@
 	    if(configs.tagging){
 		// Put model nested brands into tagging mode
 		// Attach Enable/Disable events
-		jQuery(container_selector+" [type=radio]input").each(function(){
+		jQuery(ui_container.selector()+" [type=radio]input").each(function(){
 		    var btn = jQuery(this)
 		    btn.on('change', toggle_elements)
 		})
@@ -200,22 +190,18 @@
 	    if(!configs.tagging){
 		return
 	    }
+	    var ui_container = new sel2mix.BikeBMContainer(configs.tagging)
 
-	    var ui_container = new sel2mix.BikeBMContainer()
-	    var model_sel_class =
-		ui_container.inner_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::ModelSelect.selector_class}"%>"
-	    var model_sel = jQuery(model_sel_class)
+	    // TODO clear the brand_id when in tagging mode
 
-	    var brand_sel_class = ui_container.inner_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
-	    var brand_sel = jQuery(brand_sel_class)
-
+	    // clear the model name
+	    ui_container.input('model_name').val('')
+	    
 	    if(model_sel){
 		sel2mix.clear_selection(model_sel)
 		
 		if(e.val)
-		    model_sel.select2('open')	    
+		    ui_container.input('model_name').triggerHandler('focus')
 	    }
 	}
 
@@ -256,7 +242,6 @@
 
     } // var BrandSelectBuilder
 
-
     var ModelSelectBuilder = function(conf){	
 	var configs = sel2mix.parsed_conf(conf)		
 	configs.api_url = conf.api_url
@@ -265,58 +250,19 @@
 	    [I18n.translate('sel2ui.messages')]
 	)
 
-	var ui_container = new sel2mix.BikeBMContainer()
+	var ui_container = new sel2mix.BikeBMContainer(configs.tagging)
 
+	// Constrain model to a specific brand if a brand is specified
 	var constraints = function(){
-	    var brand_sel_class = 
-		ui_container.inner_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
-	    data = jQuery(brand_sel_class).select2('data') || {id:''}
+	    var brand_id = ui_container.input('brand_id').val()
 	    
-	    return (data.is_tag ) ? {id:''} : {brand:data.id}
+	    return (brand_id != '') ? {id:''} : {brand:brand_id}
 	}
 	
 	var query_data = function(term, page){
-	    var brand_sel_class = 
-		ui_container.inner_selector('create')+
-		" <%="*.#{Select2BikeBinder::Builder::BrandSelect.selector_class}"%>"
-	    data = jQuery(brand_sel_class).select2('data') || {id:''}
-
 	    // create the request parameters
 	    return sel2mix.obj_merge(
 		[{q: term}, constraints()])
-	}
-
-	// Synchronize the model_id select when in tagging mode
-	var trigger_model_id_update = function(e){
-	    if(!configs.tagging){
-		return
-	    }
-	    sel = jQuery(configs.selector)
-	    data = sel.select2('data')
-
-	    var model_id_sel_class = 
-		ui_container.inner_selector('lookup')+
-		" <%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>"
-	    model_id_sel = jQuery(model_id_sel_class)
-	    model_id_data = model_id_sel.select2('data')
-
-	    // check if the model_id has data
-	    if(!model_id_data){
-		// missing model_id implies that data is a tag
-		data = null
-	    }
-	    if(data && data.is_tag){ data=null}
-	    
-	    if(data){
-		// brand and model info is all in data
-		// update the model_id selection with brand and model information
-		model_id_sel.select2('data', data)
-	    }else{
-		// clear the model_id selection
-		sel2mix.clear_selection(model_id_sel)
-		return
-	    }
 	}
 
 	// parse the results into the format expected by Select2.
@@ -351,10 +297,7 @@
 	    }
 
 	    $(configs.selector).select2(params);    
-
-
-	    jQuery(configs.selector).on("change", trigger_model_id_update)
-
+	    
 	} // this.build = function
 
     } // var BikeModelSelectBuilder

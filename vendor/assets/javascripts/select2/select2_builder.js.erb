@@ -468,22 +468,52 @@ var sel2 = {}, sel2mix = {};
     }
 
 
-    this.BikeBMContainer = function(){
-
+    this.BikeBMContainer = function(tagging_mode){
+	var in_tagging_mode = tagging_mode
+	
 	var container_selector = function(){
 	    return "table.<%= Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>"
 	}
 
-	var inner_container_selector = function(group){
+	var group_selector = function(group){
 	    return (container_selector()+" td."+group)
-	};
-
-	this.selector=function(){
-	    return container_selector()
+	}
+	
+	var append_group_sel = function(selector, group, is_grouped){
+	    return (is_grouped) ? 
+		group_selector(group) + " " + selector 
+		: selector
 	}
 
-	this.inner_selector=function(arg){
-	    return inner_container_selector(arg)
+	var input_field ={
+	    brand_name: 
+	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_name]}"%>",
+	    brand_id:
+	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_id]}"%>",
+	    model_name:
+	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:model_name]}"%>",
+	    model_id:
+	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:model_id]}"%>",
+	}
+
+	var input_selector = function(key){
+	    return append_group_sel(input_field[key], 'create', in_tagging_mode)	    
+	}
+	
+	this.input_selector = function(key){
+	    return input_selector(key)
+	}
+
+	this.selector=function(){
+	    container_selector()
+	}
+
+	this.group = function(group){
+	    return jQuery(group_selector(group))
+	}
+
+	this.input = function(input_key){
+	    return jQuery(input_selector(input_key))
 	}
     }
 
