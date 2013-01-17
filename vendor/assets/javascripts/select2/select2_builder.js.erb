@@ -505,15 +505,26 @@ var sel2 = {}, sel2mix = {};
 	}
 
 	this.selector=function(){
-	    container_selector()
+	    return container_selector()
 	}
 
 	this.group = function(group){
 	    return jQuery(group_selector(group))
 	}
 
-	this.input = function(input_key){
+	var input_obj = function(input_key){
 	    return jQuery(input_selector(input_key))
+	}
+	this.input = function(input_key){
+	    return input_obj(input_key)
+	}
+	this.value = function(input_key){
+	    var obj = input_obj(input_key)
+	    var val = null
+	    if(obj){
+		val = obj.attr('value')
+	    }
+	    return val
 	}
     }
 

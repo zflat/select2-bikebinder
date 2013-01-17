@@ -32,9 +32,9 @@ table.<%=css_sel%> tr td{
       <%= f.label :bike_brand_name, "Brand" %>
       <% bike_brand_optns = {:param_key => 'bike_brand_id', :enabled=>false, 
       :tagging=>true, :disable=>true} %>
+      <% render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
       <%= f.text_field :bike_brand_name, :required => false, :class=>css_class[:brand_name] %>
       <%= f.hidden_field :bike_brand_id, :required => false, :class=>css_class[:brand_id] %>
-      <% render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
       <br />
       <%= f.label :bike_model_name, "Model" %>
       <% bike_model_optns = {:param_key => 'bike_model_name', :enabled=>false, 

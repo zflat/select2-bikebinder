@@ -34,11 +34,20 @@
 	}
 
 	var enable_sel_elements = function(enable, group){
-	    var command = (enable) ? 'enable' : 'disable'
+
 	    ui_container.group(group).children('input').each(function(){
-		jQuery(this).select2(command)
+		var input = jQuery(this)
+		console.log(input)
+		// enable/disable input element
+		if(enable){
+		    input.removeAttr('disabled')
+		}else{ // see http://jsfiddle.net/gnarf/GpmSs/2/
+		    input.attr('disabled', 'disabled').val('')
+		}
+
+		// clear the contents
 		if(! enable ){
-		    sel2mix.clear_selection(this)
+		    input.val('')
 		}
 	    });
 
@@ -116,10 +125,20 @@
 	}
 
 	var init_sel = function(element, callback){
-	    var data
+	    var data = {}
 	    // TODO handle case of multiple select vs. single select
 	    console.log(element)
-	    
+	    var model_id = element.attr('value')
+	    if(model_id){
+		data = {
+		    brand:ui_container.value('brand_name'),
+		    brand_id:ui_container.value('brand_id'),
+		    text:ui_container.value('model_name'),
+		    id:model_id,
+		    tag:false
+		}
+	    }
+	    console.log(data)
 	    callback(data)
 	}
 
@@ -157,12 +176,16 @@
 	    
 	    if(configs.tagging){
 		// Put model nested brands into tagging mode
-		// Attach Enable/Disable events
+		
+		// Attach Enable/Disable events to raiod buttons
 		jQuery(ui_container.selector()+" [type=radio]input").each(function(){
 		    var btn = jQuery(this)
 		    btn.on('change', toggle_elements)
 		})
 	        jQuery(configs.selector).on("change", trigger_tagging_action)
+
+		// Attach events to the brand select
+		
 	    }
 
 	    
@@ -179,7 +202,6 @@
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('sel2ui.messages')]
 	)
-
 
 	// When the brand changes, the selection
 	// for model is no longer valid, so it
