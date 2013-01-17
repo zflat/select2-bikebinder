@@ -33,22 +33,33 @@
 	    create:{lookup:false,create:true}
 	}
 
-	var enable_sel_elements = function(enable, group){
-
+	var enable_sel = function(sel, enable){
+	    var command = (enable) ? 'enable':'disable'
+	    sel.select2(command)    
+	    // clear contents
+	    if (!enable)
+		sel2mix.clear_selection(sel)
+	}
+	var enable_input = function(input, enable){
+	    console.log(input)
+	    // enable/disable input element
+	    if(enable){
+		input.removeAttr('disabled')
+	    }else{ // see http://jsfiddle.net/gnarf/GpmSs/2/
+		input.attr('disabled', 'disabled').val('')
+	    }
+	    // clear the contents
+	    if(! enable ){
+		input.val('')
+	    }
+	}
+	var enable_ui_elements = function(group, enable){
 	    ui_container.group(group).children('input').each(function(){
 		var input = jQuery(this)
-		console.log(input)
-		// enable/disable input element
-		if(enable){
-		    input.removeAttr('disabled')
-		}else{ // see http://jsfiddle.net/gnarf/GpmSs/2/
-		    input.attr('disabled', 'disabled').val('')
-		}
-
-		// clear the contents
-		if(! enable ){
-		    input.val('')
-		}
+		if(input.attr('type') == 'text')
+		    enable_input(input, enable)
+		else
+		    enable_sel(input, enable)
 	    });
 
 	    // coerce the radio to match enabled status
@@ -60,8 +71,8 @@
 	    var optn = element.attr('value')
 	    var checked = !!element.attr('checked')
 	    
-	    enable_sel_elements(enable_map[optn]['lookup'] && checked, 'lookup')
-	    enable_sel_elements(enable_map[optn]['create'] && checked, 'create')
+	    enable_ui_elements('lookup',enable_map[optn]['lookup'] && checked)
+	    enable_ui_elements('create',enable_map[optn]['create'] && checked)
 	}
 
 	// Accessor method that indicates what input
@@ -88,16 +99,16 @@
 	    var b_id = data.brand_id
 
 	    // force a toggle of the interface
-	    enable_sel_elements(false, 'lookup')
-	    enable_sel_elements(true, 'create')
+	    enable_ui_elements('lookup', false)
+	    enable_ui_elements('create',true)
 
 	    // set the brand name
-	    ui_container.input('brand_name').val(data.brand)
+	    ui_container.input('brand_name').attr('value',data.brand)
 	    // set the brand id
-	    ui_container.input('brand_id').val(data.brand_id)	    
+	    ui_container.input('brand_id').attr('value', data.brand_id)	    
 
 	    // enter the model select
-	    ui_container.input('model_name').triggerHandler('focus')
+	    ui_container.input('model_name').focus()
 	}
 
 
@@ -127,7 +138,6 @@
 	var init_sel = function(element, callback){
 	    var data = {}
 	    // TODO handle case of multiple select vs. single select
-	    console.log(element)
 	    var model_id = element.attr('value')
 	    if(model_id){
 		data = {
@@ -138,7 +148,6 @@
 		    tag:false
 		}
 	    }
-	    console.log(data)
 	    callback(data)
 	}
 
@@ -177,18 +186,20 @@
 	    if(configs.tagging){
 		// Put model nested brands into tagging mode
 		
-		// Attach Enable/Disable events to raiod buttons
+		// Attach Enable/Disable events to radio buttons
 		jQuery(ui_container.selector()+" [type=radio]input").each(function(){
 		    var btn = jQuery(this)
 		    btn.on('change', toggle_elements)
 		})
 	        jQuery(configs.selector).on("change", trigger_tagging_action)
 
+		// toggle the input fields to disabled
+		//enable_input_elements(true, 'lookup')
+		enable_ui_elements('create', false)
+
 		// Attach events to the brand select
 		
 	    }
-
-	    
 
 	} // this.build = function
 
