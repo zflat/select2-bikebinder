@@ -1,4 +1,5 @@
 require 'select2-bikebinder/version'
+require 'select2-bikebinder/builder/builder'
 
 module Select2BikeBinder
 

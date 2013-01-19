@@ -33,7 +33,7 @@ Clone the select2-bikebinder repository, build then install
 	gem build select2-bikebinder.gemspec
 	gem install select2-bikebinder-VER.gem
 
-## Basic Usage 
+## Setup
 
 
 ### Run the setup for i18n
@@ -61,6 +61,16 @@ Add to your `app/assets/stylesheets/application.css`:
 	*= require select2
 	*= require select2/wheel_select
 	*= require select2/color_select
+
+## Basic Usage 
+
+### Classes and methods
+
+    # examples of CSS selectors for form elements
+    css_selector = "*.#{Select2BikeBinder::Builder::WheelDiameterSelect.selector_class}"%>",    
+    css_class = Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class
+    brand_name ="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_name]}"
+    brand_id ="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_id]}"
 
 ### Add the select element to your view
 

@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'iso_bsd-i18n'
-require 'rails/select_builder'
-require 'rails/builder'
+require 'builder/select_builder'
+require 'builder/builder'
 module Select2BikeBinder
   module Builder
     describe SelectBuilder do

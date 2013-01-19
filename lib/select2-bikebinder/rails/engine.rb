@@ -1,5 +1,4 @@
 require 'rails'
-require 'select2-bikebinder/rails/builder'
 
 module Select2BikeBinder
   module Rails
