@@ -6,16 +6,22 @@ table.<%=css_sel%> tr td{
   border-width: 1px 0px 0px 0px;
   margin: 0px;
 }
+table.<%=css_sel%> tr td.toggle{
+padding-right: 10px;
+}
 </style>
 
 <% f = form_builder %>
 
 <p><%= value %>Brand and Model Information</p>
-<table class="<%=Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class %>">
+<table class="<%= css_sel %>">
   <tr>
-    <td>
-      <%= f.radio_button :brand_action, 'lookup', :checked => true %>
-      <%= f.label :brand_action, "Lookup", :value => 'lookup' %>
+    <td class="toggle">
+      <label class="radio" value"lookup">
+	<%= f.radio_button :brand_action, 'lookup', :checked => true %>
+	Lookup
+      </label>
+      <% f.label :brand_action, "Lookup", :value => 'lookup' %>
     </td>
     <td class="lookup">
       <% nested_model_optns = {:param_key => 'bike_model_id', :tagging=>true, :value=>value} %>
@@ -24,23 +30,24 @@ table.<%=css_sel%> tr td{
   </tr>
 
   <tr>
-    <td>
-      <%= f.radio_button :brand_action, 'create', :checked => false %>
-      <%= f.label :brand_action, "Create", :value=>"create" %>
+    <td class="toggle">
+      <label class="radio" value="create">
+	<%= f.radio_button :brand_action, 'create', :checked => false %>
+	Create
+      </label>
     </td>
     <td class="create">
-      <%= f.label :bike_brand_name, "Brand" %>
-      <% bike_brand_optns = {:param_key => 'bike_brand_id', :enabled=>false, 
-      :tagging=>true, :disable=>true} %>
-      <% render Select2BikeBinder::Builder::BrandSelect.new(f, bike_brand_optns ) %>
-      <%= f.text_field :bike_brand_name, :required => false, :class=>css_class[:brand_name] %>
-      <%= f.hidden_field :bike_brand_id, :required => false, :class=>css_class[:brand_id] %>
+      
+      <%= f.label :bike_brand_name do %>
+        Brand
+        <%= f.text_field :bike_brand_name, :required => false, :class=>css_class[:brand_name] %>
+        <%= f.hidden_field :bike_brand_id, :required => false, :class=>css_class[:brand_id] %>
+      <% end %>
       <br />
-      <%= f.label :bike_model_name, "Model" %>
-      <% bike_model_optns = {:param_key => 'bike_model_name', :enabled=>false, 
-      :tagging=>true, :disable=>true} %>
-      <%= f.text_field :bike_model_name, :required => false, :class=>css_class[:model_name] %>
-      <% render Select2BikeBinder::Builder::ModelSelect.new(f, bike_model_optns) %>
+      <%= f.label :bike_model_name do %>
+        Model
+        <%= f.text_field :bike_model_name, :required => false, :class=>css_class[:model_name] %>
+      <% end %>
     </td>
   </tr>
 </table>

@@ -497,7 +497,9 @@ var sel2 = {}, sel2mix = {};
 	}
 
 	var input_selector = function(key){
-	    return append_group_sel(input_field[key], 'create', in_tagging_mode)	    
+	    return append_group_sel("label "+input_field[key], 
+				    'create', 
+				    in_tagging_mode)	    
 	}
 	
 	this.input_selector = function(key){
