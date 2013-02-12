@@ -101,12 +101,17 @@ var sel2 = {}, sel2mix = {};
 	}
 	
 	var inner_matcher_fn = function(data, search_term){
-	    var term = search_term.toLowerCase()
-	    var arr_term = data.split(" ")
-	    for (var i=0; i<arr_term.length; i++){
-		var word = jQuery.trim(arr_term[i]).toLowerCase();
-		if(prefix_match(word, term)){
-		    return true
+	    var phrase = search_term.toLowerCase()
+	    var arr_term = phrase.split(" ")
+	    arr_term.unshift(phrase)
+	    var arr_text = data.split(" ")
+	    for(var n=0; n<arr_term.length; n++){
+		var term = arr_term[n]
+		for (var i=0; i<arr_text.length && term.length>0; i++){
+		    var word = jQuery.trim(arr_text[i]).toLowerCase();
+		    if(prefix_match(word, term)){
+			return true
+		    }
 		}
 	    }
 	    return false
@@ -209,7 +214,7 @@ var sel2 = {}, sel2mix = {};
 		choices = q.search(term, optns1);
 		choices = choices.matches;
 	    }
-	    if(append_header){
+	    if(append_header && choices.length>0){
 		choices = append_header(choices);
 	    }
 	    return choices
