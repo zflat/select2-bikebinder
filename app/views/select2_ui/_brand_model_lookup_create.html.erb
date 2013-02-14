@@ -13,11 +13,11 @@ padding-right: 10px;
 
 <% f = form_builder %>
 
-<p><%= value %>Brand and Model Information</p>
+<p>Brand and Model Information</p>
 <table class="<%= css_sel %>">
   <tr>
     <td class="toggle">
-      <label class="radio" value"lookup">
+      <label class="radio" value="lookup">
 	<%= f.radio_button :brand_action, 'lookup', :checked => true %>
 	Lookup
       </label>
