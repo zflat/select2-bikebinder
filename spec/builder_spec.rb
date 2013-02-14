@@ -1,8 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'iso_bsd-i18n'
-require 'builder/select_builder'
-require 'builder/builder'
 module Select2BikeBinder
   module Builder
     describe SelectBuilder do
@@ -82,6 +79,19 @@ module Select2BikeBinder
         end
       end
     end # descrive WheelDiameterSelect
+
+    describe ColorSelect do
+      before :all do
+        @sel = ColorSelect.new('test')
+      end
+      
+      it "should have an options list of [value, id]"do
+        expect(@sel.optns_list).to_not be_empty
+        n_options = Select2BikeBinder.configuration.color_option_keys.count
+        expect(@sel.optns_list.count).to eq(n_options)
+      end
+      
+    end
 
     describe ModelNestedBrandSelect do
 

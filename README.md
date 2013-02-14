@@ -35,6 +35,9 @@ Clone the select2-bikebinder repository, build then install
 
 ## Setup
 
+### Run the installation generator
+
+	rails g select2_bike_binder:install
 
 ### Run the setup for i18n
 

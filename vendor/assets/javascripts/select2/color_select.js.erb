@@ -1,8 +1,16 @@
 (function(){
     var ColorSelectBuilder = function(conf){
-	var color_keys = <%= ColorNameI18n::keys.to_json.html_safe  %>;
+
+	console.log('test')
+	console.log(conf)
 
 	var configs = sel2mix.parsed_conf(conf)
+
+	var color_keys = (conf.color_keys) 
+	    ? conf.color_keys 
+	    : <%= ColorNameI18n::keys.to_json.html_safe  %>;
+
+	console.log(color_keys)
 
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('colorselui.messages'),
