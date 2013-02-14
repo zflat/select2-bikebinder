@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 require_relative 'select_builder'
+require_relative 'color_option'
 
 module Select2BikeBinder
   module DynamicOptnsMix
