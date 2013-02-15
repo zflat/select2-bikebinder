@@ -197,6 +197,14 @@
 		enable_ui_elements('create', false)
 
 		// Attach events to the brand select
+		ui_container.input('brand_name').autocomplete({
+		    source: ['test1', 'test2'],  //"<%= '' %>",
+		    minLength: 2,
+		    select: function(event, ui){
+			
+		    }
+		})
+		//ui_container.input('model_name')
 		
 	    }
 

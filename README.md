@@ -8,8 +8,10 @@ See select2-rails for basics for setup
 
 ### Install select2-rails and select2-bikebinder gem
 
-Add `select2-rails` and 'select2-bikebinder' to your Gemfile
+Add 'select2-rails', 'select2-bikebinder' and additional asset dependencies to your application Gemfile
 
+	gem "jquery-rails"
+	gem "jquery-ui-rails"
 	gem "i18n-js"
 	gem "select2-rails"
 	gem "select2-bikebinder"
@@ -49,6 +51,8 @@ Add the following to your `app/assets/javascripts/application.js`:
 
 	//= require select2
 	//= require i18n
+	//= require 'jquery'
+	//= require 'jquery.ui.all'
 	//= require i18n/translations
 	//= require select2/select2_builder
 	//
@@ -62,6 +66,7 @@ Add the following to your `app/assets/javascripts/application.js`:
 Add to your `app/assets/stylesheets/application.css`:
 
 	*= require select2
+	*= require jquery.ui.all
 	*= require select2/wheel_select
 	*= require select2/color_select
 
