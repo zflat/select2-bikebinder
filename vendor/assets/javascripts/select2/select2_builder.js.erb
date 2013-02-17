@@ -474,6 +474,9 @@ var sel2 = {}, sel2mix = {};
 
 
     this.BikeBMContainer = function(tagging_mode){
+	<% 1.times do %>
+	<% selector = Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector %>
+
 	var in_tagging_mode = tagging_mode
 	
 	var container_selector = function(){
@@ -489,8 +492,6 @@ var sel2 = {}, sel2mix = {};
 		group_selector(group) + " " + selector 
 		: selector
 	}
-	<% 1.times do %>
-	<% selector = Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector %>
 	var input_field ={
 	    brand_name: 
 	    "<%="*.#{selector[:brand_name]}"%>",
@@ -503,7 +504,7 @@ var sel2 = {}, sel2mix = {};
 	    model_constraint:
 	    "<%="*.#{selector[:model_constraint]}"%>"
 	}
-	<% end %>
+
 	var input_selector = function(key){
 	    return append_group_sel("label "+input_field[key], 
 				    'create', 
@@ -522,6 +523,10 @@ var sel2 = {}, sel2mix = {};
 	    return jQuery(group_selector(group))
 	}
 
+	this.input_group = function(group){
+	    return jQuery(group_selector(group)+' *.<%= selector[:taginp] %>')
+	}
+
 	var input_obj = function(input_key){
 	    return jQuery(input_selector(input_key))
 	}
@@ -536,6 +541,7 @@ var sel2 = {}, sel2mix = {};
 	    }
 	    return val
 	}
+	<% end # selector scope%>
     }
 
 

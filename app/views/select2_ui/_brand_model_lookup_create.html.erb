@@ -49,7 +49,8 @@ padding-right: 10px;
       <br />
       <%= f.label :bike_model_name do %>
         Model
-        <%= f.text_field :bike_model_name, :required => false, :class=>css_class[:model_name] %>
+        <%= f.text_field :bike_model_name, :required => false, 
+	:class=>"#{css_class[:model_name]} #{css_class[:taginp]}" %>
       <% end %>
     </td>
   </tr>

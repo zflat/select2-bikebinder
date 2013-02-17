@@ -55,23 +55,13 @@
 	    }
 	}
 	var enable_ui_elements = function(group, enable){
-	    console.log(group)
-	    ui_container.group(group).children('input').each(function(){
+	    ui_container.input_group(group).each(function(){
 		var input = jQuery(this)
 		if(input.attr('type') == 'text')
 		    enable_input(input, enable)
 		else
 		    enable_sel(input, enable)
 	    });
-	    ui_container.group(group).children('label input').each(function(){
-		var input = jQuery(this)
-		console.log(input)
-		if(input.attr('type') == 'text')
-		    enable_input(input, enable)
-		else
-		    enable_sel(input, enable)
-	    });
-
 
 	    // coerce the radio to match enabled status
 	    var radio = jQuery(ui_container.selector()+" input[value="+group+"]:radio")
