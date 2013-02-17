@@ -39,7 +39,7 @@ module Select2BikeBinder
     end
 
     class ColorSelect < SelectBuilder
-      def self.selector_class; "color_sel" end
+      def self.selector_class; "js-color_sel" end
 
       def default_options
         super.merge({:width=>'200px'})
@@ -64,12 +64,25 @@ module Select2BikeBinder
         end
         private
         def self.selectors
-          {:class =>"bike_model_nested_brand_sel",
-            :brand_name => "bike_brand_name_input",
-            :brand_id => "bike_brand_id_input",
-            :model_name => "bike_model_name_input"}
+          {:class =>"js-bike_model_nested_brand_sel",
+            :brand_name => "js-bike_brand_name_input",
+            :brand_id => "js-bike_brand_id_input",
+            :model_name => "js-bike_model_name_input",
+            :model_constraint => "js-model_constraint",
+            :taginp => "js-taginp"
+          }
         end
       end # class Selector
+
+      def css_class
+        unless @css
+          @css = super
+          @css += " bigdrop"
+          @css += " tagging" if tagging?
+          @css += " #{Selector[:taginp]}" if tagging?
+        end
+        @css
+      end
 
       def self.selector_class; Selector[:class] end
 

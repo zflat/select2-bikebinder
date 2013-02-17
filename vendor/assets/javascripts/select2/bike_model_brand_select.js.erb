@@ -4,6 +4,8 @@
 
         var configs = sel2mix.parsed_conf(conf)		
 	configs.api_url = conf.api_url
+	configs.brand_api_url = conf.brand_api_url
+	configs.model_api_url = conf.model_api_url
 
 	var msg =  sel2mix.obj_merge(
 	    [I18n.translate('sel2ui.messages')]
@@ -53,6 +55,7 @@
 	    }
 	}
 	var enable_ui_elements = function(group, enable){
+	    console.log(group)
 	    ui_container.group(group).children('input').each(function(){
 		var input = jQuery(this)
 		if(input.attr('type') == 'text')
@@ -60,6 +63,15 @@
 		else
 		    enable_sel(input, enable)
 	    });
+	    ui_container.group(group).children('label input').each(function(){
+		var input = jQuery(this)
+		console.log(input)
+		if(input.attr('type') == 'text')
+		    enable_input(input, enable)
+		else
+		    enable_sel(input, enable)
+	    });
+
 
 	    // coerce the radio to match enabled status
 	    var radio = jQuery(ui_container.selector()+" input[value="+group+"]:radio")
@@ -72,19 +84,6 @@
 	    
 	    enable_ui_elements('lookup',enable_map[optn]['lookup'] && checked)
 	    enable_ui_elements('create',enable_map[optn]['create'] && checked)
-	}
-
-	// Accessor method that indicates what input
-	// is active when in tagging mode
-	var active_input_group = function(){
-	    if(configs.tagging){
-		jQuery(ui_container.selector()+" [type=radio]input").each(function(){
-		    if(btn.attr('checked')){
-			return btn.attr('value')
-		    }
-		})
-		    }
-	    return null;
 	}
 
 	var trigger_tagging_action = function(e){
@@ -197,14 +196,66 @@
 		enable_ui_elements('create', false)
 
 		// Attach events to the brand select
+		var bind_model_constraint = function(event, ui){
+		    // Set the brand id as a constraint for the query
+		    var selected_id = (ui.item) ? ui.item.id : null
+		    ui_container.input('model_constraint').attr('value', selected_id)
+
+		    // Clear the model
+		    ui_container.input('model_name').attr('value', '')
+		}
 		ui_container.input('brand_name').autocomplete({
-		    source: ['test1', 'test2'],  //"<%= '' %>",
+		    source: function(request, response){
+			var results = []
+			var jqxhr = jQuery.ajax({
+			    data: {q:request.term},
+			    url:configs.brand_api_url
+			}).done(function(resp){
+			    for(var i=0; i<resp.results.length; i++){
+				results[i] = {label:resp.results[i].text, 
+					      value:resp.results[i].text,
+					      id: resp.results[i].id
+					     }
+			    }
+			    response(results)
+			}).fail(function(jqXHR, textStatus){
+			    response([])
+			})
+		    },
+		    select: bind_model_constraint,
+		    change: bind_model_constraint,
 		    minLength: 2,
-		    select: function(event, ui){
-			
-		    }
+		    delay: 100
 		})
-		//ui_container.input('model_name')
+		ui_container.input('model_name').autocomplete({
+		    source: function(request, response){
+			var results = []
+
+			var brand_id_val = ui_container.
+			    input('model_constraint').attr('value')
+
+			var brand_constraint = (brand_id_val.length > 0)
+			    ? brand_id_val
+			    : null;
+
+			var jqxhr = jQuery.ajax({
+			    data: {
+				q:request.term, 
+				brand:brand_constraint
+			    },
+			    url:configs.model_api_url
+			}).done(function(resp){
+			    for(var i=0; i<resp.results.length; i++){
+				results[i] = resp.results[i].text
+			    }
+			    response(results)
+			}).fail(function(jqXHR, textStatus){
+			    response([])
+			})
+		    },
+		    minLength: 2,
+		    delay: 100
+		})
 		
 	    }
 
@@ -343,7 +394,6 @@
     } // var BikeModelSelectBuilder
 
 
-    
     // Public access to the buildier
     this.ModelNestedBrandSelectBuilder = {
 	selector:"<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect.selector_class}"%>",

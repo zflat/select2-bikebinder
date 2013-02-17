@@ -489,18 +489,21 @@ var sel2 = {}, sel2mix = {};
 		group_selector(group) + " " + selector 
 		: selector
 	}
-
+	<% 1.times do %>
+	<% selector = Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector %>
 	var input_field ={
 	    brand_name: 
-	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_name]}"%>",
+	    "<%="*.#{selector[:brand_name]}"%>",
 	    brand_id:
-	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:brand_id]}"%>",
+	    "<%="*.#{selector[:brand_id]}"%>",
 	    model_name:
-	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:model_name]}"%>",
+	    "<%="*.#{selector[:model_name]}"%>",
 	    model_id:
-	    "<%="*.#{Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[:model_id]}"%>",
+	    "<%="*.#{selector[:model_id]}"%>",
+	    model_constraint:
+	    "<%="*.#{selector[:model_constraint]}"%>"
 	}
-
+	<% end %>
 	var input_selector = function(key){
 	    return append_group_sel("label "+input_field[key], 
 				    'create', 

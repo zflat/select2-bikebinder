@@ -46,10 +46,6 @@ module Select2BikeBinder
         "#{partial_path_root}/#{ActiveSupport::Inflector::underscore(class_name)}"
       end
       
-#      def select
-#        (form?) ? @form.select : select_tag
-#      end
-
       def options
         @full_options ||= default_options.merge @opt
         @full_options

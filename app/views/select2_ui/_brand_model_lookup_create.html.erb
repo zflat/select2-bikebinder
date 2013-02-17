@@ -40,8 +40,11 @@ padding-right: 10px;
       
       <%= f.label :bike_brand_name do %>
         Brand
-        <%= f.text_field :bike_brand_name, :required => false, :class=>css_class[:brand_name] %>
-        <%= f.hidden_field :bike_brand_id, :required => false, :class=>css_class[:brand_id] %>
+        <%= f.text_field :bike_brand_name, :required => false, 
+	:class=>"#{css_class[:brand_name]} #{css_class[:taginp]}" %>
+        <%= hidden_field_tag css_class[:model_constraint], nil, 
+	    :required => false, 
+	    :class=>css_class[:model_constraint] %>
       <% end %>
       <br />
       <%= f.label :bike_model_name do %>
