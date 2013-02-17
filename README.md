@@ -92,7 +92,10 @@ Add to your `app/assets/stylesheets/application.css`:
 	     select_init(sel2.ColorSelectBuilder)
 
              select_init(sel2.ModelNestedBrandSelectBuilder, 
-             {optns:{api_url:"<%= bike_mfg_queries_url %>"}});
+             {optns:{api_url:"<%= bike_mfg_queries_url %>",
+	     brand_api_url: "<%= brand_queries_url %>",
+	     model_api_url: "<%= model_queries_url %>",
+	     }});
 
              select_init(sel2.BrandSelectBuilder, 
              {optns:{api_url:"<%= search_brands_url %>"}});
