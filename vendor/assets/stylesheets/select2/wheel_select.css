@@ -4,6 +4,16 @@ padding: 0;
 width: 100%;
 }
 
+.select2-results .select2-highlighted ul{
+/*
+   Get lists in the results to highlight like the rest of text.
+   this undoes the change at:
+   https://github.com/ivaynberg/select2/commit/8332d6a7e9bf61be710acad6b7bea32e540db105
+*/
+    background: transparent;
+    color: #fff;
+}
+
 table.wheel_opt tr td,
 table.wheel_opt tr th{
 border: 1px solid #999;
