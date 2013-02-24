@@ -92,8 +92,14 @@
 
 	    // set the brand name
 	    ui_container.input('brand_name').attr('value',data.brand)
-	    // set the brand id
-	    ui_container.input('brand_id').attr('value', data.brand_id)	    
+
+	    if(false){
+		// set the brand id
+		ui_container.input('brand_id').attr('value', data.brand_id)	    
+	    }
+
+	    // Set the brand id as a constraint for the query
+	    ui_container.input('model_constraint').attr('value', b_id)
 
 	    // enter the model select
 	    ui_container.input('model_name').focus()
