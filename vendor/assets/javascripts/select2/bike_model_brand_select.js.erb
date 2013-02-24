@@ -70,7 +70,7 @@
 	var toggle_elements = function(e){
 	    var element = jQuery(e.target)
 	    var optn = element.attr('value')
-	    var checked = !!element.attr('checked')
+	    var checked = element.is(":checked")
 	    
 	    enable_ui_elements('lookup',enable_map[optn]['lookup'] && checked)
 	    enable_ui_elements('create',enable_map[optn]['create'] && checked)
