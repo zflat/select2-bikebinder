@@ -65,7 +65,11 @@
 
 	    // coerce the radio to match enabled status
 	    var radio = jQuery(ui_container.selector()+" input[value="+group+"]:radio")
-	    radio.attr('checked', enable)
+	    if(enable){
+		radio.prop('checked', 'checked')
+	    }else{
+		radio.removeProp('checked')
+	    }
 	}
 	var toggle_elements = function(e){
 	    var element = jQuery(e.target)
@@ -89,17 +93,17 @@
 	    // force a toggle of the interface
 	    enable_ui_elements('lookup', false)
 	    enable_ui_elements('create',true)
-
+	    
 	    // set the brand name
-	    ui_container.input('brand_name').attr('value',data.brand)
-
+	    ui_container.input('brand_name').val(data.brand)
+	    
 	    if(false){
 		// set the brand id
-		ui_container.input('brand_id').attr('value', data.brand_id)	    
+		ui_container.input('brand_id').val(data.brand_id)	    
 	    }
 
 	    // Set the brand id as a constraint for the query
-	    ui_container.input('model_constraint').attr('value', b_id)
+	    ui_container.input('model_constraint').val(b_id)
 
 	    // enter the model select
 	    ui_container.input('model_name').focus()
@@ -132,7 +136,7 @@
 	var init_sel = function(element, callback){
 	    var data = {}
 	    // TODO handle case of multiple select vs. single select
-	    var model_id = element.attr('value')
+	    var model_id = element.val()
 	    if(model_id){
 		data = {
 		    brand:ui_container.value('brand_name'),
@@ -188,18 +192,18 @@
 		})
 	        jQuery(configs.selector).on("change", trigger_tagging_action)
 
-		// toggle the input fields to disabled
-		//enable_input_elements(true, 'lookup')
+		// initialize the input fields
+		enable_ui_elements('lookup', true)
 		enable_ui_elements('create', false)
 
 		// Attach events to the brand select
 		var bind_model_constraint = function(event, ui){
 		    // Set the brand id as a constraint for the query
 		    var selected_id = (ui.item) ? ui.item.id : null
-		    ui_container.input('model_constraint').attr('value', selected_id)
+		    ui_container.input('model_constraint').val(selected_id)
 
 		    // Clear the model
-		    ui_container.input('model_name').attr('value', '')
+		    ui_container.input('model_name').val('')
 		}
 		ui_container.input('brand_name').autocomplete({
 		    source: function(request, response){
@@ -224,12 +228,13 @@
 		    minLength: 2,
 		    delay: 100
 		})
+
 		ui_container.input('model_name').autocomplete({
 		    source: function(request, response){
 			var results = []
 
 			var brand_id_val = ui_container.
-			    input('model_constraint').attr('value')
+			    input('model_constraint').val()
 
 			var brand_constraint = (brand_id_val.length > 0)
 			    ? brand_id_val
