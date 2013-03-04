@@ -2,8 +2,8 @@
 <% css_sel = css_class[] %>
 <style>
 table.<%=css_sel%> tr td{
-  border:1px solid #999;
-  border-width: 1px 0px 0px 0px;
+  border-color:#999;
+  border-width: 1px 0px;
   margin: 0px;
 }
 table.<%=css_sel%> tr td.toggle{
@@ -12,16 +12,14 @@ padding-right: 10px;
 </style>
 
 <% f = form_builder %>
-
-<p>Brand and Model Information</p>
-<table class="<%= css_sel %>">
+<table class="<%= css_sel %> table table-bordered">
+  <tbody>
   <tr>
     <td class="toggle">
       <label class="radio" value="lookup">
-	<%= f.radio_button :brand_action, 'lookup', :checked => true %>
+	<%= f.radio_button :brand_action, 'lookup', :checked => true, :class=>"radio" %>
 	Lookup
       </label>
-      <% f.label :brand_action, "Lookup", :value => 'lookup' %>
     </td>
     <td class="lookup">
       <% nested_model_optns = {:param_key => 'bike_model_id', :tagging=>true, :value=>value} %>
@@ -32,12 +30,11 @@ padding-right: 10px;
   <tr>
     <td class="toggle">
       <label class="radio" value="create">
-	<%= f.radio_button :brand_action, 'create', :checked => false %>
+	<%= f.radio_button :brand_action, 'create', :checked => false, :class=>"radio" %>
 	Create
       </label>
     </td>
     <td class="create">
-      
       <%= f.label :bike_brand_name do %>
         Brand
         <%= f.text_field :bike_brand_name, :required => false, 
@@ -54,4 +51,5 @@ padding-right: 10px;
       <% end %>
     </td>
   </tr>
+  </tbody>
 </table>
