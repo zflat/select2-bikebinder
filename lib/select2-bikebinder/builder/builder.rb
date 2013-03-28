@@ -93,7 +93,7 @@ module Select2BikeBinder
 
     class BrandSelect < SelectBuilder
       include DynamicOptnsMix
-      def self.selector_class; "bike_brand_sel" end      
+      def self.selector_class; "js-bike_brand_sel" end      
       def default_options
         super.merge({:width=>'300px', :tagging=>false})
       end
@@ -101,7 +101,7 @@ module Select2BikeBinder
 
     class ModelSelect < SelectBuilder
       include DynamicOptnsMix
-      def self.selector_class; "bike_model_sel" end      
+      def self.selector_class; "js-bike_model_sel" end      
       def default_options
         super.merge({:width=>'300px', :tagging=>false})
       end

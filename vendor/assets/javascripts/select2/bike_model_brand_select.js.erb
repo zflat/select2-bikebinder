@@ -177,7 +177,7 @@
 		    return '<strong>'+item.brand+',</strong> ' + item.text
 		},
 		escapeMarkup: function(m){ return m},
-		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
+		dropdownCssClass: "bigdrop <%= Select2BikeBinder::Builder::ModelNestedBrandSelect::Selector[] %>" // apply css that makes the dropdown taller
 	    } // params ={...}
 
 	    jQuery(configs.selector).select2(params);    
@@ -324,7 +324,7 @@
 		formatSelection: function(item){
 		    return item.text
 		},
-		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
+		dropdownCssClass: "bigdrop <%= Select2BikeBinder::Builder::BrandSelect.selector_class %>" // apply css that makes the dropdown taller
 	    }
 
 	    $(configs.selector).select2(params);    
@@ -386,7 +386,7 @@
 		formatSelection: function(item){
 		    return item.text
 		},
-		dropdownCssClass: "bigdrop" // apply css that makes the dropdown taller
+		dropdownCssClass: "bigdrop <%= Select2BikeBinder::Builder::ModelSelect.selector_class %>" // apply css that makes the dropdown taller
 	    }
 
 	    $(configs.selector).select2(params);    
