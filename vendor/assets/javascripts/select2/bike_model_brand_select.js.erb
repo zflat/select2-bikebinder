@@ -36,8 +36,7 @@
 	}
 
 	var enable_sel = function(sel, enable){
-	    var command = (enable) ? 'enable':'disable'
-	    sel.select2(command)    
+	    sel.select2('enable', enable)    
 	    // clear contents
 	    if (!enable)
 		sel2mix.clear_selection(sel)
